@@ -1,0 +1,15 @@
+.DS_Store
+node_modules
+.vscode
+fullOrgMDBackup
+out
+sfdx
+MetadataPackages
+DiffProject
+Artifacts
+orgbackups
+/.idea/
+Misc
+.unotes
+.history
+CommandsToRunLocally.md

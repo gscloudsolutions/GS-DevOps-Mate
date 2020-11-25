@@ -1,0 +1,121 @@
+version: '1.0'
+build_version: 'v2'
+stages:
+  - Prepare and Build
+  - General-Tests
+  - SFDX-Repo-Tests
+  - Non-SFDX-Repo-Tests
+  - Test-Release
+  - Release
+  - Cleanup
+steps:
+  main_clone:
+    title: Cloning main repository...
+    type: git-clone
+    repo: '${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}'
+    revision: '${{CF_REVISION}}'
+    git: github-gs
+  DockerImageBuild:
+    title: Building Prod Ready Docker Image
+    type: build
+    image_name: gscloudsolutions/devops-mate
+    registry: gs-dockerhub
+    working_directory: ./
+    tag: '${{CF_BUILD_ID}}'
+    dockerfile: Dockerfile
+    stage: Prepare and Build
+    when:
+      branch:
+        only:
+          - main
+  RohanDockerImage:
+    title: Building Docker Image For Rohan(Testing)
+    type: build
+    image_name: gscloudsolutions/devops-mate-rohan
+    working_directory: ./
+    registry: gs-dockerhub
+    tag: '${{CF_BUILD_ID}}'
+    dockerfile: Dockerfile
+    stage: Prepare and Build
+    when:
+      condition:
+        all:
+          authorIsRohanGore: 'upper("${{CF_COMMIT_AUTHOR}}") == "ROHANGS"'
+          featureBranch: 'match("${{CF_BRANCH}}", "^feature", false) == true'
+  CollabDockerImage:
+    title: Building Docker Image For Collaborators(Testing)
+    type: build
+    image_name: gscloudsolutions/devops-mate-test
+    working_directory: ./
+    registry: gs-dockerhub
+    tag: '${{CF_BUILD_ID}}'
+    dockerfile: Dockerfile
+    stage: Prepare and Build
+    when:
+      condition:
+        all:
+          authorIsRohanGore: 'upper("${{CF_COMMIT_AUTHOR}}") != "ROHANGS"'
+          featureBranch: 'match("${{CF_BRANCH}}", "^feature", false) == true'
+  CheckCommitAuthorForMain:
+    stage: General-Tests
+    image: ${{DockerImageBuild}}
+    commands:
+      - echo 'Commit Author:' ${{CF_COMMIT_AUTHOR}}
+    when:
+      branch:
+        only:
+          - main
+  CheckCommitAuthorForCollab:
+    stage: General-Tests
+    image: ${{CollabDockerImage}}
+    commands:
+      - echo 'Commit Author:' ${{CF_COMMIT_AUTHOR}}
+    when:
+      condition:
+        all:
+          authorIsNotRohanGore: 'upper("${{CF_COMMIT_AUTHOR}}") != "ROHANGS"'
+          featureBranch: 'match("${{CF_BRANCH}}", "^feature", false) == true'
+  ParallelyTagImagesOnDockerRegistries:
+    type: parallel
+    stage: Release
+    steps:
+      TagDockerImageAsStableOnDockerHub:
+        type: push
+        title: Push Prod Ready Docker Image on Docker Hub
+        candidate: ${{DockerImageBuild}}
+        tags:
+          - stable
+          - ${{CF_BUILD_ID}}
+        registry: gs-dockerhub
+        when:
+          branch:
+            only:
+              - main
+      PushForRohanToDockerHub:
+        stage: Release
+        type: push
+        title: Push Rohan's Docker Image on Docker Hub
+        candidate: ${{RohanDockerImage}}
+        tags:
+          - latest
+          - ${{CF_SHORT_REVISION}}
+        registry: gs-dockerhub
+        when:
+          condition:
+            all:
+              authorIsRohanGore: 'upper("${{CF_COMMIT_AUTHOR}}") == "ROHANGS"'
+              featureBranch: 'match("${{CF_BRANCH}}", "^feature", false) == true'
+      PushForCollaboratorsToDockerHub:
+        stage: Release
+        type: push
+        title: Push Collaborators' Docker Image on Docker Hub
+        candidate: ${{CollabDockerImage}}
+        tags:
+          - latest
+          - ${{CF_SHORT_REVISION}}
+        registry: gs-dockerhub
+        when:
+          condition:
+            all:
+              authorIsNotRohanGore: 'upper("${{CF_COMMIT_AUTHOR}}") != "ROHANGS"'
+              featureBranch: 'match("${{CF_BRANCH}}", "^feature", false) == true'

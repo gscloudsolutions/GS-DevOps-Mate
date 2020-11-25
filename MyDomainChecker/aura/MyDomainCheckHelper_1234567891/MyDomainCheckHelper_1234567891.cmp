@@ -1,0 +1,5 @@
+<aura:component
+    implements="lightning:appHomeTemplate"
+    description="A component to test whether the my domain is being propagated to a scratch org or not"
+    access="global"></aura:component>
+  

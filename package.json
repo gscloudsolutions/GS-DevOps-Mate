@@ -1,0 +1,56 @@
+{
+  "name": "gs-devops-mate",
+  "version": "0.1.0",
+  "description": "CI/CD Services Agnostic tool to make conventional CI/CD for Salesforce super easy!",
+  "main": ".src/sourcedeploy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gscloudsolutions/GS-DevOps-Mate"
+  },
+  "keywords": [
+    "Groundswell Cloud Solutions Inc", "Salesforce", "deployments", "ci/cd", "automated-deployments",
+    "SFDX", "JavaScript", "NodeJS", "GS DevOps Mate"
+  ],
+  "author": "rohan@gscloudsolutions.com",
+  "license": "BSD3",
+  "homepage": "https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/README.md",
+  "dependencies": {
+    "@salesforce/core": "^1.3.2",
+    "axios": "^0.19.2",
+    "commander": "^2.20.0",
+    "dir-compare": "^1.7.2",
+    "extract-zip": "^1.6.7",
+    "fs-extra": "^7.0.1",
+    "jsforce": "^1.9.1",
+    "log4js": "^6.1.2",
+    "minimist": "^1.2.0",
+    "node-emoji": "^1.8.1",
+    "recursive-readdir": "^2.2.2",
+    "shelljs": "^0.8.3",
+    "table-builder": "^2.1.1",
+    "tableify": "^1.1.0",
+    "type-detect": "^4.0.8",
+    "xml2js": "^0.4.23",
+    "xmlbuilder": "^12.0.0",
+    "zip-a-folder": "0.0.7"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "sfAuth": "src/authenticate.js",
+    "sfPackages": "src/createPackages.js",
+    "sfCompare": "src/sfDiff.js",
+    "sfTest": "src/runApexTests.js",
+    "sfDeploy": "src/deploy.js",
+    "sfDeploymentInfo": "src/deploymentInfoService.js",
+    "sfOrgs": "src/scratchOrgService.js",
+    "sfRetrieve": "src/commands/retrieve.js",
+    "sfMetaInfo": "src/manifestUtil.js",
+    "sfInstall": "src/commands/packageInstallation.js"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb": "^17.1.0"
+  }
+}
