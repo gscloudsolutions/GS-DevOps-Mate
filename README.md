@@ -46,8 +46,7 @@ Please check 'How to use' section in the sfPackages mdapi command details.
 
 Now let's look into the Artifact Creation commands:
 
-`sfPackages mdapi`  
-**Description:**   
+1. **sfPackages mdapi:**   
 This command is used to create an artifact from a mdapi/non-sfdx format Git repo. Supports artifact creation from the whole repo or between any two any commits.  
 **Parameters:**    
 -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
@@ -57,9 +56,9 @@ This command is used to create an artifact from a mdapi/non-sfdx format Git repo
 -v --packageVersion: Custom version for of an artifact. This is required if the command is not used in conjunction with 'sfDeploymentInfo get' command.  
 **How to use:**    
 **Without Old commit or using 'sfDeploymentInfo get' command before (full artifact creation will happen in this case):**  
-`  sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -n HEAD -v <Version Number>  `  
+`sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -n HEAD -v <Version Number>  `  
                                   or  
-`  sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -v <Version Number> `  
+`sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -v <Version Number> `  
 TODO: Check whether it works without the version parameter in this case. Should work. Creates a version prefix as 'start-headSHA'  
 **Examples:**  
 *BitBucket Pipelines*:  
@@ -91,8 +90,8 @@ BITBUCKET\_BUILD\_NUMBER (Standard Pipeline Variable): Build number
 PACKAGE\_DIR (Custom Pipeline Variable): You can have any name for this variable like QA\_PACAAKGE\_DIR or PROD\_PCKG\_DIR etc. and the value also would be the directory name of your choice like PackageDir, QAPckgDir etc.  
 LATEST\_COMMIT\_HASH\_TAG (Custom Pipeline variable): Value for this variable can be any Git SHA or Tag, Typically value would be 'HEAD'  
 All other variables are also custom Pipeline variables and are self-explanatory   
-2. `sfPackages source-combined`  
-**Description:**  
+
+2. **sfPackages source-combined :**  
 This command is used to create an artifact from a source/sfdx format Git repo. If the repo consists of multiple modules, the metadata from all of them will be combined in the artifact. Supports artifact creation from the whole repo or between any two any commits.  
 **Parameters:**   
 -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
@@ -104,8 +103,8 @@ This command is used to create an artifact from a source/sfdx format Git repo. I
 Same as 'sfPackages mdapi' command  
 **Examples:**    
 Same as 'sfPackages mdapi' command
-3. `sfPackages source-multi`  
-**Description:**    
+
+3. **sfPackages source-multi:**    
 This command is used to create an artifact from a multi-modular source/sfdx format Git repo. It creates a separate artifact for each module. Supports artifact creation from the whole repo or between any two any commits. The motivation behind this command is to support modular deployments and let a team release it's features without waiting for other teams. There is some work needed to be done on this command in terms of how to manage these artifacts and their deployments, also from a process point of view. This command is more for experimental use now.  
 **Parameters:**   
 -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
@@ -119,8 +118,7 @@ Same as 'sfPackages mdapi' command
 
 ### Deployment:
 
-1. `sfDepploy mdapi`  
-**Description:**  
+1. **sfDepploy mdapi: **  
 This command is used to do the deployment validation or deploy the artifact created by any of the commands discussed above to a Salesforce Org. This command works in conjunction with any of the artifact creation command or if the artifact is created and stored as an artifactory provided by the CI/CD service. We will talk more about the artifactory part in a later section.
 **Parameters:**    
 -p --artifactPath: The location where the artifact is being created by any of the artifact creation commands (Required)   
