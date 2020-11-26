@@ -13,8 +13,9 @@ A Dockerized NodeJS CLI App mostly wrapping the SFDX commands to effectively per
 2. Having this tool as a Docker image allows us to utilize the same set of commands across various CI/CD services out there. It also provides us the liberty to have SFDX and bash available at any team's disposal to not only use our commands but the raw SFDX and bash ones if there is the need. Having a Docker image already available with all the dependencies also improves the performance instead of downloading the build related dependencies at the build time.
 3. Being open source and everything in JS, you have all the liberty to add more features as long as you have a dev who knows basic NodeJs and JavaScript.
 4. We do not want you to fill your build yaml files with a lot of cryptic bash script, instead now you have full NodeJS at your disposal to handle things in a more sophisticated way.
+5. You can read more about GS DevOps Mate and it's features in a series of blog posts here and also feel free to watch this webinar
 
-## Core Idea:
+# Core Idea:
 
 Typically CI/CD or a typical source control based build on Salesforce Core Platform revolved around 5 major activities:
 
@@ -22,27 +23,17 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 2. Create a deployable package<sup>1</sup>/artifact out of the Git repo (The repo can be in either of the SFDX or NON-SFDX/MDAPI format)
 3. Validate<sup>2</sup>/Deploy the artifact
 4. Running Tests<sup>3</sup>
-
-A Big TODO: Minimize the params to the commands as required and instead rely on Global variables.
-Three main activities would be required for it:
-
-1. Support for accessing Global variable in the NodeJS code of this tool.
-2. Global variable names need to be standardized.
-3. Documentation on how to configure these environment variables in various CI/CD services
-Note: Backward compatibility for already existing pipelines utilizing the older commands need to be taken care of.
+5. Retrieve the org changes
 
 Here is a list of commands available:
-
-### Easy Authentication
 
 ### Scratch Org Creation
 
 ### Artifact Creation:
 
-All the commands for 'Artifact Creation' can work as independent commands or can work in conjunction with 'sfDeploymentInfo get' command:
+**Note:** _All the commands for 'Artifact Creation' can work as independent commands or can work in conjunction with 'sfDeploymentInfo get' command_
 
-`sfDeploymentInfo get`  
-**Description:**  
+**sfDeploymentInfo get :**  
 This command when runs against a target org, get the org state in terms of what is the last commit SHA/tag related to the successful deployment. This commit sha info in turn can be used by the artifact creation commands to do the Git diff against a newer commit passed as a required parameter.  
 **Parameters:**  
 -n --module: Module name to get it's latest state in the target. Only required with a SFDX multi-module repo and that too when a different artifact is to be created for each module. For all other use cases, any string value can be passed. TODO: Need to make it optional.  
@@ -55,7 +46,7 @@ Please check 'How to use' section in the sfPackages mdapi command details.
 
 Now let's look into the Artifact Creation commands:
 
-1. `sfPackages mdapi`  
+`sfPackages mdapi`  
 **Description:**   
 This command is used to create an artifact from a mdapi/non-sfdx format Git repo. Supports artifact creation from the whole repo or between any two any commits.  
 **Parameters:**    
@@ -66,21 +57,16 @@ This command is used to create an artifact from a mdapi/non-sfdx format Git repo
 -v --packageVersion: Custom version for of an artifact. This is required if the command is not used in conjunction with 'sfDeploymentInfo get' command.  
 **How to use:**    
 **Without Old commit or using 'sfDeploymentInfo get' command before (full artifact creation will happen in this case):**  
-`sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -n HEAD -v <Version Number>`  
+`  sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -n HEAD -v <Version Number>  `  
                                   or  
-`sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -v <Version Number>`  
+`  sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -v <Version Number> `  
 TODO: Check whether it works without the version parameter in this case. Should work. Creates a version prefix as 'start-headSHA'  
 **Examples:**  
 *BitBucket Pipelines*:  
 `sfPackages mdapi -p $BITBUCKET_CLONE_DIR/$PACKAGE_DIR -n HEAD -v 1.0.$BITBUCKET_BUILD_NUMBER`  
 BITBUCKET\_CLONE\_DIR (Standard Pipeline Variable): Represents path of the working directory in BB Pipelines in which the repo is cloned.  
 BITBUCKET\_BUILD\_NUMBER (Standard Pipeline Variable): Build number  
-PACKAGE\_DIR (Custom Pipeline Variable): You can have any name for this variable like QA\_PACAAKGE\_DIR or PROD\_PCKG\_DIR etc. and the value also would be the directory name of your choice like PackageDir, QAPckgDir etc.  
-*Azure DevOps*:  
-*Circle CI*:  
-*GitHub Actions*:  
-*GitLab*:  
-*Codefresh*:  
+PACKAGE\_DIR (Custom Pipeline Variable): You can have any name for this variable like QA\_PACAAKGE\_DIR or PROD\_PCKG\_DIR etc. and the value also would be the directory name of your choice like PackageDir, QAPckgDir etc. 
 **With Old commit (Will create a Git diff based artifact based on the new and old commits passed as param):**  
 `sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -n HEAD -o <Git Tag or Commit SHA from some older commit> -v <Version Number>`  
 TODO: Check whether it works without the version parameter in this case and what happens to the sfDeploy command, should work and pick up a full deployment artifact if it exists but then there would not be a way for the sfDeploy command to pick an artifact created by this command.  
@@ -91,11 +77,6 @@ BITBUCKET\_CLONE\_DIR (Standard Pipeline Variable): Represents path of the worki
 BITBUCKET\_BUILD\_NUMBER (Standard Pipeline Variable): Build number  
 PACKAGE\_DIR (Custom Pipeline Variable): You can have any name for this variable like QA\_PACAAKGE\_DIR or PROD\_PCKG\_DIR etc. and the value also would be the directory name of your choice like PackageDir, QAPckgDir etc.  
 PRVS\_COMMIT\_TAG (Custom Pipeline Variable): You can have any name for this variable like INT\_COMMIT\_TAG, OLD\_COMMIT\_TAG, QA\_COMMIT\_TAG etc. and the value also would be the tag name that you decided to tag the commit after successful deployment like INT\_DEPLOYED, QA\_DEPLOYED, DEPLOYED etc.  
-*Azure DevOps*:  
-*Circle CI*:  
-*GitHub Actions*:  
-*GitLab*:  
-*Codefresh*:  
 **With 'sfDeploymentInfo get' command:**  
 Will create a Git diff based artifact based on the new and old commits, where old commit would be based on the old commit SHA stored in the target Org, if could not find the SHA, a full artifact will get created which is fine as no commit SHA in the target Org signifies no successful deployment happened before or it is the first deployment. In such a case the artifact anyways should be created from the very first commit till the new commit up to which you want to deploy. Once the successful deployment, the deploy command if could not find the Old Commit Info, it not only creates the info record but first deploys the Custom Settings Object meant to hold this info and then creates the record)  
 `sfDeploymentInfo get -u <Target Org Username> -s <Target Org Password> -t <Target Org Type> -i <Unique Identifier for the Build> -n All`  
@@ -110,11 +91,6 @@ BITBUCKET\_BUILD\_NUMBER (Standard Pipeline Variable): Build number
 PACKAGE\_DIR (Custom Pipeline Variable): You can have any name for this variable like QA\_PACAAKGE\_DIR or PROD\_PCKG\_DIR etc. and the value also would be the directory name of your choice like PackageDir, QAPckgDir etc.  
 LATEST\_COMMIT\_HASH\_TAG (Custom Pipeline variable): Value for this variable can be any Git SHA or Tag, Typically value would be 'HEAD'  
 All other variables are also custom Pipeline variables and are self-explanatory   
-*Azure DevOps*:  
-*Circle CI*:  
-*GitHub Actions*:  
-*GitLab*:  
-*Codefresh*:  
 2. `sfPackages source-combined`  
 **Description:**  
 This command is used to create an artifact from a source/sfdx format Git repo. If the repo consists of multiple modules, the metadata from all of them will be combined in the artifact. Supports artifact creation from the whole repo or between any two any commits.  
@@ -166,12 +142,18 @@ This command is used to do the deployment validation or deploy the artifact crea
 **Deployment with version parameter**:  
 `sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -u $QA_ORG_USERNAME -s $QA_ORG_PASSWORD -t $QA_ORG_TYPE -v 1.0.$BITBUCKET_BUILD_NUMBER`  
 Please refer to the examples above for Pipeline variables.  
-*Azure DevOps*:  
-*Circle CI*:  
-*GitHub Actions*:  
-*GitLab*:  
-*Codefresh*:  
 
+#Roadmap:
+
+Minimize the params to the commands as required and instead rely on Global variables.
+Three main activities would be required for it:
+
+1. Support for accessing Global variable in the NodeJS code of this tool.
+2. Global variable names need to be standardized.
+3. Documentation on how to configure these environment variables in various CI/CD services
+
+
+Note: Backward compatibility for already existing pipelines utilizing the older commands need to be taken care of.
 <sup>1</sup>Packages here do not mean Second Generation or First Generation Packages of any kind. Instead, package or artifact here is referring to a folder containing one or more metadata with a package manifest file (package.xml) and this folder can be deployed to a Salesforce org if all the required dependencies and features for the metadata in this folder are there in that Org. From here on, we will refer to this SF deployable folder as an Artifact for the sake of clarity, but the commands in the tooling will still refer it as package. At some point, we will change such command names, it's in the TODO list.  
 <sup>2</sup>Validation include steps like static code analysis, tests run, instead of just the deployment validation on a Salesforce Org. Deployment validation is a nice way to figure out any issues in terms of missing dependencies, features to enable for the metadata in the package to be deployed and running apex tests without actually saving the code in the target org.  
 <sup>3</sup>This includes Apex tests, LWC/Aura Components JS Tests and UI Automation tests. Please note that UI Automation tests can not be run as part of the deployment validation step. They need the config and code to be actually deployed to run.  
