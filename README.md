@@ -27,15 +27,16 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 
 Here is a list of commands available:
 
-### Scratch Org Creation
+## Scratch Org Creation
 
-### Artifact Creation:
+## Artifact Creation:
 
 **Note:** _All the commands for 'Artifact Creation' can work as independent commands or can work in conjunction with 'sfDeploymentInfo get' command_
 
-**sfDeploymentInfo get :**  
+### sfDeploymentInfo get
+#### Description
 This command when runs against a target org, get the org state in terms of what is the last commit SHA/tag related to the successful deployment. This commit sha info in turn can be used by the artifact creation commands to do the Git diff against a newer commit passed as a required parameter.  
-**Parameters:**  
+#### Parameters:  
 -n --module: Module name to get it's latest state in the target. Only required with a SFDX multi-module repo and that too when a different artifact is to be created for each module. For all other use cases, any string value can be passed. TODO: Need to make it optional.  
 -u --targetUsername: Username or alias for the target org. Alias can only be used if the target org is already authenticated with one of the tooling's or sfdx authentication commands.  
 -s --password: Password for the target org. If your build service's IP is not whitelisted, please make sure to append the security token as well to the password. Please refer here on how to generate security token.(Required if username is passed, do not pass if alisa is being used)  
@@ -46,22 +47,22 @@ Please check 'How to use' section in the sfPackages mdapi command details.
 
 Now let's look into the Artifact Creation commands:
 
-1. **sfPackages mdapi:**   
-This command is used to create an artifact from a mdapi/non-sfdx format Git repo. Supports artifact creation from the whole repo or between any two any commits.  
-**Parameters:**    
+### sfPackages mdapi
+#### Description:
+This command is used to create an artifact from a mdapi/non-sfdx format Git repo. Supports artifact creation from the whole repo or between any two any commits.
+#### Parameters:   
 -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
 -o --oldCommit: Any commit SHA or Git tag (Optional). Only use this parameter when the command is not used in conjunction with 'sfDeploymentInfo get' command. Make sure this should be an older commit than the commit SHA passed in new commit. If you want to create a package all the way from the very first commit to the commit passed in new commit param, every time, neither use this param, nor use the 'sfDeploymentInfo get' command.  
 -p --artifactsLocation: The path where generated artifact would be stored. This would typically be the working directory of the CI/CD service. You can also add a name for your own folder to the working directory path and the command will take care of creating this folder in the path provided.(Required) TODO: Figure out a way to make this parameter optional at least for a set of CI/CD services like Azure DevOps, Cricle CI, BB Pipelines, CodeFresh and GitLabs.  
 -i --buildId: Any unique identifier which is unique to every build. Typically can be the build number or id based on the CI/CD service being used. Required, if this command is used in conjunction with the 'sfDeploymentInfo get' command. Else, would be ignored.  
 -v --packageVersion: Custom version for of an artifact. This is required if the command is not used in conjunction with 'sfDeploymentInfo get' command.  
-**How to use:**    
-**Without Old commit or using 'sfDeploymentInfo get' command before (full artifact creation will happen in this case):**  
+#### How to use:   
+##### Without Old commit or using 'sfDeploymentInfo get' as a command before sfPackage command(full artifact creation will happen in this case):  
 `sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -n HEAD -v <Version Number>  `  
                                   or  
 `sfPackages mdapi -p <CI/CD Service Working Directory Path>/<CI/CD Service Working Directory Path/Folder name of your choice> -v <Version Number> `  
-TODO: Check whether it works without the version parameter in this case. Should work. Creates a version prefix as 'start-headSHA'  
-**Examples:**  
-*BitBucket Pipelines*:  
+##### Examples:  
+**BitBucket Pipelines:**  
 `sfPackages mdapi -p $BITBUCKET_CLONE_DIR/$PACKAGE_DIR -n HEAD -v 1.0.$BITBUCKET_BUILD_NUMBER`  
 BITBUCKET\_CLONE\_DIR (Standard Pipeline Variable): Represents path of the working directory in BB Pipelines in which the repo is cloned.  
 BITBUCKET\_BUILD\_NUMBER (Standard Pipeline Variable): Build number  
