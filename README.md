@@ -212,13 +212,18 @@ Please refer to the examples above for Pipeline variables.
 
 # Roadmap:
 
-Minimize the params to the commands as required and instead rely on Global variables.
-Three main activities would be required for it:
+High Priority:
+[] Support for PMD based Static Code Analysis for Apex and VF
+[] Support for ESLint based Static Code Analysis for LWCs
+[] Enhancements to ChangeSet Retrieval to support Custom Objects in MDAPI format and Custom Labels, Workflows and Profiles in both MDAPI and Source(SFDX) format
+[] Eager Artifact Picking to release branches
 
-1. Support for accessing Global variable in the NodeJS code of this tool.
-2. Global variable names need to be standardized.
-3. Documentation on how to configure these environment variables in various CI/CD services
-**Note:** _Backward compatibility for already existing pipelines utilizing the older commands need to be taken care of._
+Medium Priority:
+[] Package Manifest Generation Command
+[] Support for more than 10K metadata retrieval
+
+Good to Have:
+[] Org compare based deployments
 
 <sup>1</sup>_Packages here do not mean Second Generation or First Generation Packages of any kind. Instead, package or artifact here is referring to a folder containing one or more metadata with a package manifest file (package.xml) and this folder can be deployed to a Salesforce org if all the required dependencies and features for the metadata in this folder are there in that Org. From here on, we will refer to this SF deployable folder as an Artifact for the sake of clarity, but the commands in the tooling will still refer it as package. At some point, we will change such command names, it's in the TODO list.  
 <sup>2</sup>Validation include steps like static code analysis, tests run, instead of just the deployment validation on a Salesforce Org. Deployment validation is a nice way to figure out any issues in terms of missing dependencies, features to enable for the metadata in the package to be deployed and running apex tests without actually saving the code in the target org.  
