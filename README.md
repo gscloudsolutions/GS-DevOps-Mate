@@ -35,12 +35,64 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 
 # For TL;DR: How to quickly set it up on your BitBucket Pipelines
 
+## General Setup:
+
+Enable the pipelines as shown below:
+
+**Note:** _You must be an admin for the repository  to make this configuration change_
+
+### Setup the deployment environments as shown below:
+
+### Setup the environment variables:
+
+Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines below:
+
+The username for the DockerHub, not required if the image is public. Used in YAML.
+
+The password for the DockerHub, not required if the image is public. Used in YAML.
+
+The logging level, if this variable is not created, the default value would be info, other valid ones are fatal < error < warning < info < debug < trace. Used internally by the tool.
+
+Controls Slack message, if not created, default would be on. Used internally by the tool.
+
+Minimum coverage percentage required while validating/deploying the code and considered it to be successful. Can be anything from 75 to 100. If not created, default would be 100. Used internally by the tool.
+
+The name of the CI_CD_Provider that the Slack Messaging implementation needs to fetch the right info from the CI/CD service in context. Used internally by the tool.
+
+The latest commit HASH tag. Used in YAML.
+
+Salesforce Orgs' types. Valid values are DEVELOPER, SANDBOX, SCRATCH, and PRODUCTION. Used in YAML.
+
+Salesforce Orgs' usernames. Used in YAML.
+
+Salesforce Orgs' passwords. Make sure that they are created as secret variables. Used in YAML.
+
+Artifact directories for different orgs/environments. Used in YAML. These repository variables are not required. If you are not creating them, make sure to remove their references from the bitbucket-pipelines.yml file and also the artifact upload steps would be:
+
+artifacts:
+            - Artifacts/**
+instead of
+artifacts:
+            - QADir/Artifacts/**
+
+Test levels. Used in YAML. Valid values are NoTestRun, RunLocalTests, RunSpecifictTest, RunAllTests
+
+This variable needs to be created only for the package creation where diff is not calculated based on the Deployment Info custom setting in the Target Org. Used in YAML.
+
+These three variables are also used to create a package version. Need to be created only for the package creation where diff is not calculated based on the Deployment Info custom setting in the Target Org. Used in YAML. You can check their usage in Gitflow Workflow YAMLs below.
+
+Gitflow Workflow:
+
+For a detailed overview of Gitflow Workflow please check here.
+
+Create a bitbucket-pipelines.yml file with the following YAML in main/master branch:
 
 
 
-# Core Commands
 
-## Scratch Org Creation
+# Core Commands:
+
+## Scratch Org Creation:
 
 ## Artifact Creation:
 
