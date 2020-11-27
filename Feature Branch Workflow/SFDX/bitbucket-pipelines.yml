@@ -1,0 +1,145 @@
+image:
+  name: gscloudsolutions/sf-alm-tooling:stable
+  username: $DOCKER_HUB_USERNAME
+  password: $DOCKER_HUB_PASSWORD
+
+pipelines:
+  pull-requests:
+      feature/*: #any branch with a feature prefix
+        - step:
+            name: Creating Deployment Package for CI(Continuous Integration)
+            script:
+              - echo 'Getting Target Org Status From QA/Partial Dev Org'
+              - sfDeploymentInfo get -u $QA_ORG_USERNAME -t $QA_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $QA_ORG_PASSWORD
+              - echo 'Creating a Git Diff based artifact/package'
+              - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+            artifacts:
+              - QADir/Artifacts/**
+        - step:
+            name: Scratch Org Deployment Validation
+            script:
+              - echo 'Create Scratch Org'
+              - sfOrgs createOrg -x 'CIOrg-$BITBUCKET_BUILD_NUMBER' -p ./config/project-scratch-def.json -t $DEVHUB_ORG_TYPE -u $DEVHUB_USERNAME -s $DEVHUB_PASSWORD
+              - echo 'Create a full deployment artifact/package'
+              - sfPackages source-combined -f true -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
+              - echo 'Deploy the package to Scratch Org'
+              - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -a 'CIOrg-$BITBUCKET_BUILD_NUMBER' -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
+        - step:
+            name: Deployment Validation On QA/Partial-Dev Org/Environment
+            script:
+              - echo 'Getting Target Org Status From QA/Partial Dev Org'
+              - sfDeploymentInfo get -u $QA_ORG_USERNAME -t $QA_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $QA_ORG_PASSWORD
+              #- echo 'Creating a Git Diff based artifact/package'
+              #- sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+              - echo 'Deployment Validation On QA/Partial-Dev Org.'
+              - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -c true -u $QA_ORG_USERNAME -s $QA_ORG_PASSWORD -t $QA_ORG_TYPE --successSHA $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER
+            artifacts:
+              - QADir/Artifacts/**
+  branches:
+    # Pipeline for master branch
+    'master':
+      #Automated step as BB Pipeline can not start with a manual step
+      - step:
+          name: Feature Ready for QA
+          script:
+             - echo 'Ready for QA'
+      #QA Org Deployment
+      - step:
+          name: QA Org Deployment
+          deployment: QAOrg
+          #trigger: manual
+          script:
+            - echo 'Getting Target Org Status From QA Org'
+            - sfDeploymentInfo get -u $QA_ORG_USERNAME -t $QA_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $QA_ORG_PASSWORD
+            - echo 'Creating a Git Diff based artifact/package'
+            - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+            - echo 'Deployment On QA Org.'
+            - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -u $QA_ORG_USERNAME -s $QA_ORG_PASSWORD -t $QA_ORG_TYPE --successSHA $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER -l RunLocalTests
+      #UAT Org Deployment 
+      - step:
+          name: UAT Org Deployment
+          deployment: UATOrg
+          trigger: manual
+          script:
+            - echo 'Getting Target Org Status from UAT Org'
+            - sfDeploymentInfo get -u $UAT_ORG_USERNAME -t $UAT_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $UAT_ORG_PASSWORD
+            - echo 'Creating a Git Diff based artifact/package'
+            - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$UAT_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+            - echo 'UAT Org Deployment Validation'
+            - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$UAT_PACKAGE_DIR -u $UAT_ORG_USERNAME -s $UAT_ORG_PASSWORD -t $UAT_ORG_TYPE --successSHA $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER -l RunLocalTests
+          artifacts:
+            - UATDir/Artifacts/**
+      #Production Org Deployment Validation
+      - step:
+          name: Creating Deployment Package for QA/Partial-Dev Org Validation
+          script: 
+            - echo 'Getting Target Org Status from Prodcution Org'
+            - sfDeploymentInfo get -u $PROD_ORG_USERNAME -t $PROD_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $PROD_ORG_PASSWORD
+            - echo 'Creating a Git Diff based artifact/package'
+            - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+          artifacts:
+            - ProdDir/Artifacts/**
+      - step:
+          name: Prod Org Deployment Validation
+          trigger: manual
+          script:
+            - echo 'Getting Target Org Status from Prodcution Org'
+            - sfDeploymentInfo get -u $PROD_ORG_USERNAME -t $PROD_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $PROD_ORG_PASSWORD
+            - echo 'Creating a Git Diff based artifact/package'
+            - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+            - echo 'Production Org Deployment Validation'
+            - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -c true -u $PROD_ORG_USERNAME -s $PROD_ORG_PASSWORD -t $PROD_ORG_TYPE --successSHA $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER -l RunLocalTests
+      #Production Org Deployment
+      - step:
+          name: Prod Org Deployment
+          deployment: ProdOrg
+          trigger: manual
+          script:
+            - echo 'Getting Target Org Status from Prodcution Org'
+            - sfDeploymentInfo get -u $PROD_ORG_USERNAME -t $PROD_ORG_TYPE -i $BITBUCKET_BUILD_NUMBER -n All -s $PROD_ORG_PASSWORD
+            - echo 'Creating a Git Diff based artifact/package'
+            - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+            - echo 'Production Org Deployment'
+            - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -u $PROD_ORG_USERNAME -s $PROD_ORG_PASSWORD -t $PROD_ORG_TYPE --successSHA $LATEST_COMMIT_HASH_TAG -i $BITBUCKET_BUILD_NUMBER -l RunLocalTests
+          artifacts:
+            - ProdDir/Artifacts/**
+  
+
+  custom: # Pipelines that can only be triggered manually or can be scheduled
+    PullAndCommitChangeSet:
+      - variables:  #list variable names under here
+          - name: CHANGESET_NAME
+          - name: COMMIT_MESSAGE
+          - name: BRANCH_NAME
+      - step:
+          name: Checkout a git branch
+          script:
+            - echo 'Checking out git branch'
+            - pwd
+            - echo $BITBUCKET_CLONE_DIR
+            - echo $CHANGESET_NAME
+            - echo $COMMIT_MESSAGE
+            - echo $BRANCH_NAME
+            - ls -a
+            - git checkout -b "feature/$BRANCH_NAME"
+            - echo 'Pulling changeset and commiting it to checked out branch'
+            - sfRetrieve src-format -u $DEV_SF_USERNAME -s $DEV_SF_PASSWORD -t $SANDBOX_ORG_TYPE -n "$CHANGESET_NAME" -p $BITBUCKET_CLONE_DIR
+            - ls -a
+            - git add --all
+            - git commit -m "$COMMIT_MESSAGE"
+            - git push
+    DeployParticularCommit:
+    - variables:  #list variable names under here
+        - name: COMMIT_HASH_OR_TAG
+    - step:
+        name: Create Artifact
+        script:
+          - echo 'Creating a Git Diff based artifact/package'
+          - sfPackages source-combined -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -n "$COMMIT_HASH_OR_TAG" -o "$COMMIT_HASH_OR_TAG~1" -v 1.0.0.$BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
+        artifacts:
+          - QADir/Artifacts/**
+    - step:
+        name: Deploy Artifact
+        script:
+          - echo 'Deploying Artifact'
+          - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR/$QA_PACKAGE_DIR -u $QA_ORG_USERNAME -s $QA_ORG_PASSWORD -t $QA_ORG_TYPE -v 1.0.0.$BITBUCKET_BUILD_NUMBER -l RunLocalTests
