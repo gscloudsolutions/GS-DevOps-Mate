@@ -54,28 +54,28 @@ To access the enviornment variables click on .......as shown below:
 
 Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines. Some of them are used internally by the tool as environment variables while others are used in the YAML. The variables which are used in YAML can be named something else as well baseed on your convenience but then make sure to refer the right names in the YAML. The quick start YAML we are providing here is based on the names we are suggesting. 
 
-**DOCKER_HUB_USERNAME:**
+> **DOCKER_HUB_USERNAME:**
 The username for the DockerHub, not required if the image is public. Used in YAML.
 **DOCKER_HUB_PASSWORD:**
-The password for the DockerHub, not required if the image is public. Make sure to select the **Secured** checkbox so that they are created as secret variables. Used in YAML.
+The password for the DockerHub, not required if the image is public. Make sure to select the **Secured** checkbox so that they are created as secret variables. Used in YAML.  
 **LOGGING_LEVEL:**
-The logging level, if this variable is not created, the default value would be info, other valid ones are fatal, error, warning, info, debug, trace. Used internally by the tool.
+The logging level, if this variable is not created, the default value would be info, other valid ones are fatal, error, warning, info, debug, trace. Used internally by the tool.  
 **MIN_OVERALL_CODE_COVERAGE:**
-Minimum coverage percentage required while validating/deploying the code and considered it to be successful. Can be anything from 75 to 100. If not created, default would be 100. Used internally by the tool.
+Minimum coverage percentage required while validating/deploying the code and considered it to be successful. Can be anything from 75 to 100. If not created, default would be 100. Used internally by the tool.  
 **LATEST_COMMIT_HASH_TAG:**
-The latest commit HASH tag. Use 'HEAD' as the value if not sure. Used in YAML.
+The latest commit HASH tag. Use 'HEAD' as the value if not sure. Used in YAML.  
 **DEV_ORG_TYPE, QA_ORG_TYPE, UAT_ORG_TYPE, PROD_ORG_TYPE:**
-Salesforce Orgs' types. Valid values are DEVELOPER, SANDBOX, SCRATCH, and PRODUCTION. Used in YAML.
+Salesforce Orgs' types. Valid values are DEVELOPER, SANDBOX, SCRATCH, and PRODUCTION. Used in YAML.  
 **DEV_ORG_USERNAME, QA_ORG_USERNAME, UAT_ORG_USERNAME, PROD_ORG_USERNAME:**
-Salesforce Orgs' usernames. Used in YAML.
-**DEV_ORG_PASSWORD, QA_ORG_PASSWORD, UAT_ORG_PASSWORD, PROD_ORG_PASSWORD:**
-Salesforce Orgs' passwords. Make sure to select the **Secured** checkbox so that they are created as secret variables. Used in YAML.
+Salesforce Orgs' usernames. Used in YAML.  
+**DEV_ORG_PASSWORD, QA_ORG_PASSWORD, UAT_ORG_PASSWORD, PROD_ORG_PASSWORD:** 
+Salesforce Orgs' passwords. Make sure to select the **Secured** checkbox so that they are created as secret variables. Used in YAML.  
 **TEST_LEVEL:**
-Test levels. Used in YAML. Valid values are NoTestRun, RunLocalTests, RunSpecifictTest, RunAllTests. You can also define different test level for different deployment steps like QA_DEP_TEST_LEVEL, UAT_TEST_LEVEL, QA_VALIDATION_TEST_LEVEL etc. and assign any of the four values. For RunSpecifictTest, make sure to have a defrault test class and pass it as a param to the deployment command. You can see the example in YAMLs.
+Test levels. Used in YAML. Valid values are NoTestRun, RunLocalTests, RunSpecifictTest, RunAllTests. You can also define different test level for different deployment steps like QA_DEP_TEST_LEVEL, UAT_TEST_LEVEL, QA_VALIDATION_TEST_LEVEL etc. and assign any of the four values. For RunSpecifictTest, make sure to have a defrault test class and pass it as a param to the deployment command. You can see the example in YAMLs.  
 **FULL_PACAKGE_CREATION:**
-This variable needs to be created only for the package creation where diff is not calculated based on the last successful deployment in the Target Org. Used in YAML.
+This variable needs to be created only for the package creation where diff is not calculated based on the last successful deployment in the Target Org. Used in YAML.  
 **MAJOR_VERSION, MINOR_VERSION, PATCH:**
-These three variables are also used to create a package version. Need to be created only for the package creation where diff is not calculated based on the last successful deployment in the Target Org. Used in YAML. You can check their usage in Gitflow Workflow YAMLs below.
+These three variables are also used to create a package version. Need to be created only for the package creation where diff is not calculated based on the last successful deployment in the Target Org. Used in YAML. You can check their usage in Gitflow Workflow YAMLs below.  
 
 Gitflow Workflow:
 
