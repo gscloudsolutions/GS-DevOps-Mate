@@ -4,7 +4,8 @@
 
 # What it is?
 A Dockerized NodeJS CLI App mostly wrapping the SFDX commands to effectively perform some of the CI/CD tasks
-![GS DevOps Mate.png](./images/GS DevOps Mate.png)
+
+![GS DevOps Mate.png](./images/GS\ DevOps\ Mate.png)
 
 # Why did we build it?
 
