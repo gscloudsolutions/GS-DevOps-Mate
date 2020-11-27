@@ -7,6 +7,12 @@ A Dockerized NodeJS CLI App mostly wrapping the SFDX commands to effectively per
 
 ![GS DevOps Mate.png](./images/gdm.png)
 
+# The Big Picture
+![GS DevOps Mate.png](./images/gdm-big-picture.png)
+
+# Where Does DevsOps Mate exists in a typical Release Systems Landscape
+![GS DevOps Mate.png](./images/gdm-system-landscape.png)
+
 # Why did we build it?
 
 1. SFDX is a huge list of CLI commands meant to perform various actions on the Salesforce platform. But it's a huge list when it comes to perform actions related to CI/CD for the platform. We imagined this tool as a set of some pre-baked scripts to perform actions very specific to CI/CD for a DevOps team without getting into the nitty gritty of SFDX commands and without bothering about figuring out which ones are meant for the purpose of deployment, testing etc. and how to effectively combine them.
