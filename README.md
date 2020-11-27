@@ -10,7 +10,7 @@ A Dockerized NodeJS CLI App mostly wrapping the SFDX commands to effectively per
 # The Big Picture
 ![GS DevOps Mate.png](./images/gdm-big-picture.png)
 
-# Where Does DevsOps Mate exists in a typical Release Systems Landscape
+# Where does DevsOps Mate exists in a typical Release Systems Landscape?
 ![GS DevOps Mate.png](./images/gdm-system-landscape.png)
 
 # Why did we build it?
@@ -20,6 +20,8 @@ A Dockerized NodeJS CLI App mostly wrapping the SFDX commands to effectively per
 3. Being open source and everything in JS, you have all the liberty to add more features as long as you have a dev who knows basic NodeJs and JavaScript.
 4. We do not want you to fill your build yaml files with a lot of cryptic bash script, instead now you have full NodeJS at your disposal to handle things in a more sophisticated way.
 5. You can read more about GS DevOps Mate and it's features in a series of blog posts here and also feel free to watch this webinar
+
+# Unique Benefits and Core Features
 
 # Core Idea:
 
@@ -31,7 +33,12 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 4. Running Tests<sup>3</sup>
 5. Retrieve the org changes
 
-Here is a list of commands available:
+# For TL;DR: How to quickly set it up on your BitBucket Pipelines
+
+
+
+
+# Core Commands
 
 ## Scratch Org Creation
 
