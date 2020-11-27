@@ -19,9 +19,9 @@ A Dockerized NodeJS CLI App mostly wrapping the SFDX commands to effectively per
 2. Having this tool as a Docker image allows us to utilize the same set of commands across various CI/CD services out there. It also provides us the liberty to have SFDX and bash available at any team's disposal to not only use our commands but the raw SFDX and bash ones if there is the need. Having a Docker image already available with all the dependencies also improves the performance instead of downloading the build related dependencies at the build time.
 3. Being open source and everything in JS, you have all the liberty to add more features as long as you have a dev who knows basic NodeJs and JavaScript.
 4. We do not want you to fill your build yaml files with a lot of cryptic bash script, instead now you have full NodeJS at your disposal to handle things in a more sophisticated way.
-5. You can read more about GS DevOps Mate and it's features in a series of blog posts here and also feel free to watch this webinar
 
 # Unique Benefits and Core Features
+![groundswell.png](./images/features.png)
 
 # Core Idea:
 
@@ -32,6 +32,8 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 3. Validate<sup>2</sup>/Deploy the artifact
 4. Running Tests<sup>3</sup>
 5. Retrieve the org changes
+
+**Note:** _You can read more about GS DevOps Mate and it's features in a series of blog posts here, watch this demo and also feel free to watch this webinar._
 
 # For TL;DR: How to quickly set it up on your BitBucket Pipelines
 
@@ -49,8 +51,8 @@ This is not a required step and can be skipped
 ### Setup the environment variables:
 To setup environment variables for GS DevOps Mate, we rely on Repository Variables in BitBucket. 
 Another benefit of Repository Variables is that you can also access them as variables in the YAML file.
-To access the enviornment variables click on .......as shown below:
-**Replace with image**
+To configure the Repository Variables click on Repository Variables tab once you are in the Repository Settings as shown below:
+![groundswell.png](./images/repo-variables.png)
 
 Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines. Some of them are used internally by the tool as environment variables while others are used in the YAML. The variables which are used in YAML can be named something else as well baseed on your convenience but then make sure to refer the right names in the YAML. The quick start YAML we are providing here is based on the names we are suggesting. 
 
