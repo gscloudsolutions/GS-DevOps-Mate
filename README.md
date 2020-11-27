@@ -54,7 +54,7 @@ Another benefit of Repository Variables is that you can also access them as vari
 To configure the Repository Variables click on Repository Variables tab once you are in the Repository Settings as shown below:
 ![groundswell.png](./images/repo-variables.png)
 
-Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines. Some of them are used internally by the tool as environment variables while others are used in the YAML. The variables which are used in YAML can be named something else as well baseed on your convenience but then make sure to refer the right names in the YAML. The quick start YAML we are providing here is based on the names we are suggesting. 
+Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines. Some of them are used internally by the tool as environment variables while others are used in the YAML. The variables which are used in YAML can be named based on your convenience as well but then make sure to refer the right names in the YAML. The quick start YAMLs we are providing here are based on the names we are suggesting. 
 
 > **DOCKER_HUB_USERNAME:**
 The username for the DockerHub, not required if the image is public. Used in YAML.
@@ -84,293 +84,30 @@ CI_SUCCESS_TAG = CI_DEPLOYED, QA_SUCCESS_TAG = QA_DEPLOYED, UAT_SUCCESS_TAG = UA
 
 ### Setting up the Pipelines:
 In BitBucket Pipelines a single YAML file is used to setup multiple pipelines. In the examples below we would be covering two Git Workflows for both SFDX and MDAPI format repos.
+
 #### Gitflow Workflow:
-
 For a detailed overview of Gitflow Workflow please check [here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
-
-Create a bitbucket-pipelines.yml file with the following YAML in main/master branch:
+Create a bitbucket-pipelines.yml file with the following YAML in main/master branch. Below is list of bibucket.yaml files for different formats
 
 ##### For SFDX Format Repo:
 In this Git workflow, we will create the diff artifacts based on a Git Tags.
-
-```
-image:
-  name: gscloudsolutions/devops-mate:stable # Referencing the public image from Docker Hub
-  #username: $DOCKER_HUB_USERNAME #Username-password not required
-  #password: $DOCKER_HUB_PASSWORD
-
-pipelines:
-  pull-requests:
-    feature/*: #any branch with a feature prefix
-      - step:
-          name: Creating Deployment Package for CI(Continuous Integration)
-          script:
-            - echo 'Creating an artifact/package'
-            - sfPackages source-combined -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $QA_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-          artifacts:
-            - Artifacts/**
-      - step:
-          name: Deployment Validation On QA/Partial-Dev Org/Environment
-          script:
-            - echo 'Deployment Validation On QA/Partial-Dev Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -c true -u "$QA_ORG_USERNAME" -s "$QA_ORG_PASSWORD" -t $QA_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-          artifacts:
-            - Artifacts/**
-  branches:
-    # Pipeline for develop branch
-    'develop': # This step is required as the first step can not be manual under a BB pipeline
-      - step:
-          name: QA Org Deployment Intialization
-          script:
-            - echo 'Initialization for QA Org Deployment'
-      #QA Org Deployment
-      - step:
-          name: QA Org Deployment
-          deployment: QAOrg
-          trigger: manual
-          script:
-            - echo 'Creating an artifact/package'
-            - sfPackages source-combined -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $QA_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment On QA Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$QA_ORG_USERNAME" -s "$QA_ORG_PASSWORD" -t $QA_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            - echo "After deployment cleanup"
-            - git tag -f $QA_SUCCESS_TAG
-            - git push -f --tags
-      #Automated step as BB Pipeline can not start with a manual step
-      - step:
-          name: Feature Ready for UAT
-          script:
-            - echo 'Ready for UAT'
-      #UAT Org Deployment
-      - step:
-          name: UAT Org Deployment
-          deployment: UATOrg
-          trigger: manual
-          script:
-            - echo 'Creating an artifact/package'
-            - sfPackages source-combined -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $UAT_SUCCESS_TAG  || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment On UAT Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$UAT_ORG_USERNAME" -s "$UAT_ORG_PASSWORD" -t $UAT_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            - echo "After deployment cleanup"
-            - git tag -f $UAT_SUCCESS_TAG
-            - git push -f --tags
-
-    # Pipeline for release branch
-    'release/*':
-      #Prod Org Deployment Validation
-      - step:
-          name: Prod Org Deployment Validation
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages source-combined -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $PROD_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment Validation On Prod Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$PROD_ORG_USERNAME" -s "$PROD_ORG_PASSWORD" -t $PROD_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -c true
-
-    # Pipeline for main branch
-    'main':
-      #Prod Org Deployment Validation
-      - step:
-          name: Prod Org Deployment Validation
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages source-combined -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -n $LATEST_COMMIT_HASH_TAG -o $PROD_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment Validation On Prod Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR/$PROD_PACKAGE_DIR -u "$PROD_ORG_USERNAME" -s "$PROD_ORG_PASSWORD" -t $PROD_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -c true
-      #Prod Org Deployment
-      - step:
-          name: Prod Org Deployment
-          deployment: ProdOrg
-          trigger: manual
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages source-combined -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $PROD_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment On Prod Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$PROD_ORG_USERNAME" -s "$PROD_ORG_PASSWORD" -t $PROD_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            - echo "After deployment cleanup"
-            - git tag -f $PROD_SUCCESS_TAG
-            - git push -f --tags
-          artifacts:
-            - Artifacts/**
-
-
-  custom: # Pipelines that can only be triggered manually or can be scheduled
-    PullAndCommitMyChangeSet:
-      - variables:  #list variable names under here
-          - name: CHANGESET_NAME
-          - name: COMMIT_MESSAGE
-          - name: BRANCH_NAME
-      - step:
-          name: Checkout a git branch
-          script:
-            - echo 'Checking out git branch'
-            - pwd
-            - echo $BITBUCKET_CLONE_DIR
-            - echo $CHANGESET_NAME
-            - echo $COMMIT_MESSAGE
-            - echo $BRANCH_NAME
-            - ls -a
-            - git checkout -b "feature/$BRANCH_NAME"
-            - echo 'Pulling changeset and commiting it to checked out branch'
-            - sfRetrieve src-format -u "$DEV_ORG_USERNAME" -s "$DEV_ORG_PASSWORD" -t $DEV_ORG_TYPE -n "$CHANGESET_NAME" -p $BITBUCKET_CLONE_DIR
-            - ls -a
-            - git add --all
-            - git commit -m "$COMMIT_MESSAGE"
-            - git push
-    DeployParticularCommit:
-      - variables:  #list variable names under here
-          - name: COMMIT_HASH_OR_TAG
-      - step:
-          name: Create Artifact
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages source-combined -p $BITBUCKET_CLONE_DIR -n "$COMMIT_HASH_OR_TAG" -o "$COMMIT_HASH_OR_TAG~1" -v 1.0.0.$BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
-          artifacts:
-            - Artifacts/**
-      - step:
-          name: Deploy Artifact
-          script:
-            - echo 'Deploying Artifact'
-            - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR -u "$QA_ORG_USERNAME" -s "$QA_ORG_PASSWORD" -t $QA_ORG_TYPE -v 1.0.0.$BITBUCKET_BUILD_NUMBER -l RunLocalTests
-```
+Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/SFDX/bitbucket-pipelines.yml)
 
 ##### For MDAPI Format Repo:
 In this Git workflow, we will create the diff artifacts based on a Git Tags.
+Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/MDAPI/bitbucket-pipelines.yml)
 
-```
-image:
-  name: gscloudsolutions/devops-mate:stable #Referencing the public image from Docker Hub
-  #username: $DOCKER_HUB_USERNAME #Username-password not required
-  #password: $DOCKER_HUB_PASSWORD
+#### Feature Branch aka GitHub Workflow:
+For a detailed overview of Feature Branch Workflow please check [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) and [here](https://guides.github.com/introduction/flow/).
+Create a bitbucket-pipelines.yml file with the following YAML in main/master branch. Below is list of bibucket.yaml files for different formats
 
-pipelines:
-  pull-requests:
-      feature/*: #any branch with a feature prefix
-        - step:
-            name: Creating Deployment Package for CI(Continuous Integration)/QA Environment/Org
-            script:
-              - echo 'Creating a Git Diff based artifact/package'
-              - sfPackages mdapi -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $QA_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            artifacts:
-              - Artifacts/**
-        - step:
-            name: Deployment Validation On QA/CI Environment
-            script:
-              - echo 'Deployment Validation On QA/CI Environment'
-              - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -c true -u "$QA_ORG_USERNAME" -s "$QA_ORG_PASSWORD" -t $QA_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            artifacts:
-              - Artifacts/**
-  branches:
-    # Pipeline for develop branch
-    'develop':
-      #QA Org Deployment
-      - step:
-          name: QA Org Deployment
-          deployment: QAOrg
-          #trigger: manual
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages mdapi -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $QA_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment On QA Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$QA_ORG_USERNAME" -s "$QA_ORG_PASSWORD" -t $QA_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            - echo "After deployment cleanup"
-            - git tag -f $QA_SUCCESS_TAG
-            - git push -f --tags
-      #Automated step as BB Pipeline can not start with a manual step
-      - step:
-          name: Feature Ready for UAT
-          script:
-            - echo 'Ready for UAT'
-      #UAT Org Deployment
-      - step:
-          name: UAT Org Deployment
-          deployment: UATOrg
-          trigger: manual
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages mdapi -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $UAT_SUCCESS_TAG  || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment On UAT Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$UAT_ORG_USERNAME" -s "$UAT_ORG_PASSWORD" -t $UAT_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            - echo "After deployment cleanup"
-            - git tag -f $UAT_SUCCESS_TAG
-            - git push -f --tags
+##### For SFDX Format Repo:
+In this Git workflow, we will create the diff artifacts based on a Git Tags.
+Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/SFDX/bitbucket-pipelines.yml)
 
-    # Pipeline for release branch
-    'release/*':
-      #Prod Org Deployment Validation
-      - step:
-          name: Prod Org Deployment Validation
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages mdapi -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $PROD_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment Validation On Prod Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u $PROD_ORG_USERNAME -s "$PROD_ORG_PASSWORD" -t "$PROD_ORG_TYPE" -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -c true
-
-    # Pipeline for main branch
-    'main':
-      #Prod Org Deployment Validation
-      - step:
-          name: Prod Org Deployment Validation
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages mdapi -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $PROD_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment Validation On Prod Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$PROD_ORG_USERNAME" -s "$PROD_ORG_PASSWORD" -t $PROD_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -c true
-      #Prod Org Deployment
-      - step:
-          name: Prod Org Deployment
-          deployment: ProdOrg
-          trigger: manual
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages mdapi -f $FULL_PACKAGE_CREATION -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER -p $BITBUCKET_CLONE_DIR -n $LATEST_COMMIT_HASH_TAG -o $PROD_SUCCESS_TAG || if test $? -eq 21; then exit 0; else exit 1; fi
-            - echo 'Deployment On Prod Org.'
-            - sfDeploy mdapipackage -l $TEST_LEVEL -p $BITBUCKET_CLONE_DIR -u "$PROD_ORG_USERNAME" -s "$PROD_ORG_PASSWORD" -t $PROD_ORG_TYPE -v $MAJOR_VERSION.$MINOR_VERSION.$PATCH.$BITBUCKET_BUILD_NUMBER
-            - echo "After deployment cleanup"
-            - git tag -f $PROD_SUCCESS_TAG
-            - git push -f --tags
-          artifacts:
-            - Artifacts/**
-  
-
-  custom: # Pipelines that can only be triggered manually or can be scheduled
-    PullAndCommitMyChangeSet:
-      - variables:  #list variable names under here
-          - name: CHANGESET_NAME
-          - name: COMMIT_MESSAGE
-          - name: BRANCH_NAME
-      - step:
-          name: Checkout a git branch
-          script:
-            - echo 'Checking out git branch'
-            - pwd
-            - echo $BITBUCKET_CLONE_DIR
-            - echo $CHANGESET_NAME
-            - echo $COMMIT_MESSAGE
-            - echo $BRANCH_NAME
-            - ls -a
-            - git checkout -b "feature/$BRANCH_NAME"
-            - echo 'Pulling changeset and commiting it to checked out branch'
-            - sfRetrieve src-format -u $DEV_ORG_USERNAME -s "$DEV_ORG_PASSWORD" -t "$DEV_ORG_TYPE" -n "$CHANGESET_NAME" -p $BITBUCKET_CLONE_DIR
-            - ls -a
-            - git add --all
-            - git commit -m "$COMMIT_MESSAGE"
-            - git push
-    DeployParticularCommit:
-      - variables:  #list variable names under here
-          - name: COMMIT_HASH_OR_TAG
-      - step:
-          name: Create Artifact
-          script:
-            - echo 'Creating a Git Diff based artifact/package'
-            - sfPackages mdapi -p $BITBUCKET_CLONE_DIR -n "$COMMIT_HASH_OR_TAG" -o "$COMMIT_HASH_OR_TAG~1" -v 1.0.0.$BITBUCKET_BUILD_NUMBER || if test $? -eq 21; then exit 0; else exit 1; fi
-          artifacts:
-            - Artifacts/**
-      - step:
-          name: Deploy Artifact
-          script:
-            - echo 'Deploying Artifact'
-            - sfDeploy mdapipackage -p $BITBUCKET_CLONE_DIR -u "$QA_ORG_USERNAME" -s "$QA_ORG_PASSWORD" -t $QA_ORG_TYPE -v 1.0.0.$BITBUCKET_BUILD_NUMBER -l RunLocalTests
-```
+##### For MDAPI Format Repo:
+In this Git workflow, we will create the diff artifacts based on a Git Tags.
+Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/MDAPI/bitbucket-pipelines.yml)
 
 # Core Commands:
 
