@@ -111,7 +111,31 @@ Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-M
 
 # Core Commands:
 
-## Scratch Org Creation:
+## Scratch Org Management:
+### `sfOrgs createOrg`
+#### Description:
+Creates a scratch org, supports both JWT and Username/Password based authentications
+#### Parameters:
+**-x --newAlias:** Alias for the new scratch org
+**-p  --definitionPath:** File path to the scratch org definition file 
+**-t  --envType:**  The environment type of target Org. Either SANDBOX, PRODUCTION, or DEVELOPER 
+**-u  --sfUsername:**  Username of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
+**-s  --sfPassword:** Password of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
+**-l, --scratchOrgLength:**
+**-a, --devHubAlias:** Alias name for the DevHub to be authenticated. Not required if Dev Hub's username and password are being utilized.  
+**-i, --clientId:** The clientId from the Salesforce Connected App. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.
+**-k, --serverKey:** Encrypted JWT Server Key full path, non-encrypted key path from services like Azure where secure file is available. Required for JWT based DevHUb Auth. Not required for Username/Password based Auth to DevHub.  
+**-d, --decryptionKey:** Decryption Key to decrypt the encrypted secret key. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.
+**-v, --decryptionIV:** Decryption Initialization Vector. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.
+
+### `sfOrgs deleteOrg`
+#### Description:
+Deletes a scratch org authenticated from the Dev Hub using username/password
+**-u  --sfUsername:**  Username of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
+**-s  --sfPassword:** Password of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
+**-a, --orgAlias:**  Alias/Username for the scratch org to be deleted.
+**-t, --envType:**' The environment type of the Dev Hub Org, from which the Scratch Org to be deleted is created. Either SANDBOX, PRODUCTION OR DEVELOPER.
+
 
 ## Artifact Creation:
 
