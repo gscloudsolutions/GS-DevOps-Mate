@@ -218,7 +218,7 @@ Please refer to the examples above for Pipeline variables.
 - [ ] Enhancements to ChangeSet Retrieval to support Custom Objects in MDAPI format and Custom Labels, Workflows and Profiles in both MDAPI and Source(SFDX) format
 - [ ] Eager Artifact Picking to release branches
 
-### Medium Priority: :aircraft:
+### Medium Priority: :airplane:
 - [ ] Package Manifest Generation Command
 - [ ] Support for more than 10K metadata retrieval
 
