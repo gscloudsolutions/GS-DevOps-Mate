@@ -38,48 +38,44 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 ## General Setup:
 
 Enable the pipelines as shown below:
+![groundswell.png](./images/enable-pipeline.png)
 
-**Note:** _You must be an admin for the repository  to make this configuration change_
+**Note:** _You must be an admin for the repository to make these configuration changes_
 
 ### Setup the deployment environments as shown below:
+This is not a required step and can be skipped
+![groundswell.png](./images/deployment-env-setup.png)
 
 ### Setup the environment variables:
+To setup environment variables for GS DevOps Mate, we rely on Repository Variables in BitBucket. 
+Another benefit of Repository Variables is that you can also access them as variables in the YAML file.
+To access the enviornment variables click on .......as shown below:
+**Replace with image**
 
-Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines below:
+Here is a comprehensive list of repository variables that need to be used(all or most of them) in the Pipelines. Some of them are used internally by the tool as environment variables while others are used in the YAML. The variables which are used in YAML can be named something else as well baseed on your convenience but then make sure to refer the right names in the YAML. The quick start YAML we are providing here is based on the names we are suggesting. 
 
+**DOCKER_HUB_USERNAME:**
 The username for the DockerHub, not required if the image is public. Used in YAML.
-
-The password for the DockerHub, not required if the image is public. Used in YAML.
-
-The logging level, if this variable is not created, the default value would be info, other valid ones are fatal < error < warning < info < debug < trace. Used internally by the tool.
-
-Controls Slack message, if not created, default would be on. Used internally by the tool.
-
+**DOCKER_HUB_PASSWORD:**
+The password for the DockerHub, not required if the image is public. Make sure to select the **Secured** checkbox so that they are created as secret variables. Used in YAML.
+**LOGGING_LEVEL:**
+The logging level, if this variable is not created, the default value would be info, other valid ones are fatal, error, warning, info, debug, trace. Used internally by the tool.
+**MIN_OVERALL_CODE_COVERAGE:**
 Minimum coverage percentage required while validating/deploying the code and considered it to be successful. Can be anything from 75 to 100. If not created, default would be 100. Used internally by the tool.
-
-The name of the CI_CD_Provider that the Slack Messaging implementation needs to fetch the right info from the CI/CD service in context. Used internally by the tool.
-
-The latest commit HASH tag. Used in YAML.
-
+**LATEST_COMMIT_HASH_TAG:**
+The latest commit HASH tag. Use 'HEAD' as the value if not sure. Used in YAML.
+**DEV_ORG_TYPE, QA_ORG_TYPE, UAT_ORG_TYPE, PROD_ORG_TYPE:**
 Salesforce Orgs' types. Valid values are DEVELOPER, SANDBOX, SCRATCH, and PRODUCTION. Used in YAML.
-
+**DEV_ORG_USERNAME, QA_ORG_USERNAME, UAT_ORG_USERNAME, PROD_ORG_USERNAME:**
 Salesforce Orgs' usernames. Used in YAML.
-
-Salesforce Orgs' passwords. Make sure that they are created as secret variables. Used in YAML.
-
-Artifact directories for different orgs/environments. Used in YAML. These repository variables are not required. If you are not creating them, make sure to remove their references from the bitbucket-pipelines.yml file and also the artifact upload steps would be:
-
-artifacts:
-            - Artifacts/**
-instead of
-artifacts:
-            - QADir/Artifacts/**
-
-Test levels. Used in YAML. Valid values are NoTestRun, RunLocalTests, RunSpecifictTest, RunAllTests
-
-This variable needs to be created only for the package creation where diff is not calculated based on the Deployment Info custom setting in the Target Org. Used in YAML.
-
-These three variables are also used to create a package version. Need to be created only for the package creation where diff is not calculated based on the Deployment Info custom setting in the Target Org. Used in YAML. You can check their usage in Gitflow Workflow YAMLs below.
+**DEV_ORG_PASSWORD, QA_ORG_PASSWORD, UAT_ORG_PASSWORD, PROD_ORG_PASSWORD:**
+Salesforce Orgs' passwords. Make sure to select the **Secured** checkbox so that they are created as secret variables. Used in YAML.
+**TEST_LEVEL:**
+Test levels. Used in YAML. Valid values are NoTestRun, RunLocalTests, RunSpecifictTest, RunAllTests. You can also define different test level for different deployment steps like QA_DEP_TEST_LEVEL, UAT_TEST_LEVEL, QA_VALIDATION_TEST_LEVEL etc. and assign any of the four values. For RunSpecifictTest, make sure to have a defrault test class and pass it as a param to the deployment command. You can see the example in YAMLs.
+**FULL_PACAKGE_CREATION:**
+This variable needs to be created only for the package creation where diff is not calculated based on the last successful deployment in the Target Org. Used in YAML.
+**MAJOR_VERSION, MINOR_VERSION, PATCH:**
+These three variables are also used to create a package version. Need to be created only for the package creation where diff is not calculated based on the last successful deployment in the Target Org. Used in YAML. You can check their usage in Gitflow Workflow YAMLs below.
 
 Gitflow Workflow:
 
