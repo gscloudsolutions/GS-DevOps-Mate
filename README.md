@@ -90,11 +90,11 @@ For a detailed overview of Gitflow Workflow please check [here](https://www.atla
 Create a bitbucket-pipelines.yml file with the following YAML in main/master branch. Below is list of bibucket.yaml files for different formats
 
 ##### For SFDX Format Repo:
-In this Git workflow, we will create the diff artifacts based on a Git Tags.
+In this Git workflow, we create the diff artifacts based on a Git Tags.
 Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/SFDX/bitbucket-pipelines.yml)
 
 ##### For MDAPI Format Repo:
-In this Git workflow, we will create the diff artifacts based on a Git Tags.
+In this Git workflow, we create the diff artifacts based on a Git Tags.
 Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/MDAPI/bitbucket-pipelines.yml)
 
 #### Feature Branch aka GitHub Workflow:
@@ -102,12 +102,12 @@ For a detailed overview of Feature Branch Workflow please check [here](https://w
 Create a bitbucket-pipelines.yml file with the following YAML in main/master branch. Below is list of bibucket.yaml files for different formats
 
 ##### For SFDX Format Repo:
-In this Git workflow, we will create the diff artifacts based on a Git Tags.
-Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/SFDX/bitbucket-pipelines.yml)
+In this Git workflow, we create the diff artifacts based on the last successful commit stored in a custom setting in a target org.
+Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Feature%20Branch%20Workflow/SFDX/bitbucket-pipelines.yml)
 
 ##### For MDAPI Format Repo:
-In this Git workflow, we will create the diff artifacts based on a Git Tags.
-Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Gitflow%20Workflow/MDAPI/bitbucket-pipelines.yml)
+In this Git workflow, we create the diff artifacts based on the last successful commit stored in a custom setting in a target org.
+Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/Feature%20Branch%20Workflow/MDAPI/bitbucket-pipelines.yml)
 
 # Core Commands:
 
