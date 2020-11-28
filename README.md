@@ -255,7 +255,7 @@ Please refer to the examples above for Pipeline variables.
 
 # Roadmap:
 
-### In Progress:
+### In Progress: :gear:
  - [ ] Quick Deployment after validation
 
 ### High Priority: :rocket:
