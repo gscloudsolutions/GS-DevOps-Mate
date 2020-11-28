@@ -116,25 +116,25 @@ Please find the YAML file [here](https://github.com/gscloudsolutions/GS-DevOps-M
 #### Description:
 Creates a scratch org, supports both JWT and Username/Password based authentications
 #### Parameters:
-**-x --newAlias:** Alias for the new scratch org
-**-p  --definitionPath:** File path to the scratch org definition file 
-**-t  --envType:**  The environment type of target Org. Either SANDBOX, PRODUCTION, or DEVELOPER 
-**-u  --sfUsername:**  Username of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
-**-s  --sfPassword:** Password of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
-**-l, --scratchOrgLength:**
-**-a, --devHubAlias:** Alias name for the DevHub to be authenticated. Not required if Dev Hub's username and password are being utilized.  
-**-i, --clientId:** The clientId from the Salesforce Connected App. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.
-**-k, --serverKey:** Encrypted JWT Server Key full path, non-encrypted key path from services like Azure where secure file is available. Required for JWT based DevHUb Auth. Not required for Username/Password based Auth to DevHub.  
-**-d, --decryptionKey:** Decryption Key to decrypt the encrypted secret key. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.
-**-v, --decryptionIV:** Decryption Initialization Vector. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.
+> **-x --newAlias:** Alias for the new scratch org. 
+**-p  --definitionPath:** File path to the scratch org definition file.  
+**-t  --envType:**  The environment type of target Org. Either SANDBOX, PRODUCTION, or DEVELOPER.  
+**-u  --sfUsername:**  Username of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.  
+**-s  --sfPassword:** Password of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.  
+**-l, --scratchOrgLength:** Time to Live for Scratch Org, default 7 days, min: 7 days, max: 30 days.  
+**-a, --devHubAlias:** Alias name for the DevHub to be authenticated. Not required if Dev Hub's username and password are being utilized.      
+**-i, --clientId:** The clientId from the Salesforce Connected App. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.   
+**-k, --serverKey:** Encrypted JWT Server Key full path, non-encrypted key path from services like Azure where secure file is available. Required for JWT based DevHUb Auth. Not required for Username/Password based Auth to DevHub.    
+**-d, --decryptionKey:** Decryption Key to decrypt the encrypted secret key. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.  
+**-v, --decryptionIV:** Decryption Initialization Vector. Required for JWT based DevHub Auth. Not required for Username/Password based Auth to DevHub.  
 
-### `sfOrgs deleteOrg`
-#### Description:
-Deletes a scratch org authenticated from the Dev Hub using username/password
-**-u  --sfUsername:**  Username of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
-**-s  --sfPassword:** Password of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.
-**-a, --orgAlias:**  Alias/Username for the scratch org to be deleted.
-**-t, --envType:**' The environment type of the Dev Hub Org, from which the Scratch Org to be deleted is created. Either SANDBOX, PRODUCTION OR DEVELOPER.
+### `sfOrgs deleteOrg`. 
+#### Description:  
+Deletes a scratch org authenticated from the Dev Hub using username/password  
+> **-u  --sfUsername:**  Username of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.  
+**-s  --sfPassword:** Password of the dev hub from which Scratch Org is to be created. Not required if Dev Hub Org's alias is available and being utilized.  
+**-a, --orgAlias:**  Alias/Username for the scratch org to be deleted.  
+**-t, --envType:**' The environment type of the Dev Hub Org, from which the Scratch Org to be deleted is created. Either SANDBOX, PRODUCTION OR DEVELOPER.  
 
 
 ## Artifact Creation:
@@ -145,7 +145,7 @@ Deletes a scratch org authenticated from the Dev Hub using username/password
 #### Description:
 This command when runs against a target org, get the org state in terms of what is the last commit SHA/tag related to the successful deployment. This commit sha info in turn can be used by the artifact creation commands to do the Git diff against a newer commit passed as a required parameter.  
 #### Parameters:  
-**-n --module:** Module name to get it's latest state in the target. Only required with a SFDX multi-module repo and that too when a different artifact is to be created for each module. For all other use cases, any string value can be passed. TODO: Need to make it optional.  
+> **-n --module:** Module name to get it's latest state in the target. Only required with a SFDX multi-module repo and that too when a different artifact is to be created for each module. For all other use cases, any string value can be passed. TODO: Need to make it optional.  
 **-u --targetUsername:** Username or alias for the target org. Alias can only be used if the target org is already authenticated with one of the tooling's or sfdx authentication commands.  
 **-s --password:** Password for the target org. If your build service's IP is not whitelisted, please make sure to append the security token as well to the password. Please refer here on how to generate security token.(Required if username is passed, do not pass if alisa is being used)  
 **-i --buildId:** Any unique identifier which is unique to every build. Typically can be the build number or id based on the CI/CD service being used.(Required) TODO: To make it optional.  
@@ -159,7 +159,7 @@ Now let's look into the Artifact Creation commands:
 #### Description:
 This command is used to create an artifact from a mdapi/non-sfdx format Git repo. Supports artifact creation from the whole repo or between any two any commits.
 #### Parameters:   
--n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
+> -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
 -o --oldCommit: Any commit SHA or Git tag (Optional). Only use this parameter when the command is not used in conjunction with 'sfDeploymentInfo get' command. Make sure this should be an older commit than the commit SHA passed in new commit. If you want to create a package all the way from the very first commit to the commit passed in new commit param, every time, neither use this param, nor use the 'sfDeploymentInfo get' command.  
 -p --artifactsLocation: The path where generated artifact would be stored. This would typically be the working directory of the CI/CD service. You can also add a name for your own folder to the working directory path and the command will take care of creating this folder in the path provided.(Required) TODO: Figure out a way to make this parameter optional at least for a set of CI/CD services like Azure DevOps, Cricle CI, BB Pipelines, CodeFresh and GitLabs.  
 -i --buildId: Any unique identifier which is unique to every build. Typically can be the build number or id based on the CI/CD service being used. Required, if this command is used in conjunction with the 'sfDeploymentInfo get' command. Else, would be ignored.  
@@ -203,7 +203,7 @@ All other variables are also custom Pipeline variables and are self-explanatory
 #### Description:
 This command is used to create an artifact from a source/sfdx format Git repo. If the repo consists of multiple modules, the metadata from all of them will be combined in the artifact. Supports artifact creation from the whole repo or between any two any commits.  
 #### Parameters:   
--n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
+> -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
 -o --oldCommit: Any commit SHA or Git tag (Optional). Only use this parameter when the command is not used in conjunction with 'sfDeploymentInfo get' command. Make sure this should be an older commit than the commit SHA passed in new commit. If you want to create a package all the way from the very first commit to the commit passed in new commit param, every time, neither use this param, nor use the 'sfDeploymentInfo get' command.  
 -p --artifactsLocation: The path where generated artifact would be stored. This would typically be the working directory of the CI/CD service. You can also add a name for your own folder to the working directory path and the command will take care of creating this folder in the path provided.(Required) TODO: Figure out a way to make this parameter optional at least for a set of CI/CD services like Azure DevOps, Cricle CI, BB Pipelines, CodeFresh and GitLabs.  
 -i --buildId: Any unique identifier which is unique to every build. Typically can be the build number or id based on the CI/CD service being used. Required, if this command is used in conjunction with the 'sfDeploymentInfo get' command. Else, would be ignored.  
@@ -217,7 +217,7 @@ Same as 'sfPackages mdapi' command
 #### Description
 This command is used to create an artifact from a multi-modular source/sfdx format Git repo. It creates a separate artifact for each module. Supports artifact creation from the whole repo or between any two any commits. The motivation behind this command is to support modular deployments and let a team release it's features without waiting for other teams. There is some work needed to be done on this command in terms of how to manage these artifacts and their deployments, also from a process point of view. This command is more for experimental use now.  
 #### Parameters:  
--n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
+> -n --newCommit: Any commit SHA or Git tag.(Required if old commit is passed or this command is used in conjunction with the 'sfDeploymentInfo get' command). Make sure this should be a newer commit than the commit SHA passed in old commit. TODO: Make it optional even in case of an old commit param is passed or 'sfDeploymentInfo get' command is used. HEAD would be the default value in that case.  
 -o --oldCommit: Any commit SHA or Git tag (Optional). Only use this parameter when the command is not used in conjunction with 'sfDeploymentInfo get' command. Make sure this should be an older commit than the commit SHA passed in new commit. If you want to create a package all the way from the very first commit to the commit passed in new commit param, every time, neither use this param, nor use the 'sfDeploymentInfo get' command.  
 -p --artifactsLocation: The path where generated artifact would be stored. This would typically be the working directory of the CI/CD service. You can also add a name for your own folder to the working directory path and the command will take care of creating this folder in the path provided.(Required) TODO: Figure out a way to make this parameter optional at least for a set of CI/CD services like Azure DevOps, Cricle CI, BB Pipelines, CodeFresh and GitLabs.  
 -i --buildId: Any unique identifier which is unique to every build. Typically can be the build number or id based on the CI/CD service being used. Required, if this command is used in conjunction with the 'sfDeploymentInfo get' command. Else, would be ignored.  
@@ -233,7 +233,7 @@ Same as 'sfPackages mdapi' command
 #### Description:
 This command is used to do the deployment validation or deploy the artifact created by any of the commands discussed above to a Salesforce Org. This command works in conjunction with any of the artifact creation command or if the artifact is created and stored as an artifactory provided by the CI/CD service. We will talk more about the artifactory part in a later section.
 #### Parameters:   
--p --artifactPath: The location where the artifact is being created by any of the artifact creation commands (Required)   
+> -p --artifactPath: The location where the artifact is being created by any of the artifact creation commands (Required)   
 -v --artifactversion: The version of the artifact to be deployed. Only required if artifact version is being passed in the previous artifact creation command as well.Typically not required if artifact creation is based on the commit info gathered from the target org.  
 -u --username: Username of the target org in which the artifact needs to be validated or deployed. Not required if the target org is already authenticated via JWT or URL Auth flow.  
 -s --password: Password for the target org in which the artifact needs to be validated or deployed. Not required if the target org is already authenticated via JWT or URL Auth flow.  
