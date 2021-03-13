@@ -33,7 +33,7 @@ Typically CI/CD or a typical source control based build on Salesforce Core Platf
 4. Running Tests<sup>3</sup>
 5. Retrieve the org changes
 
-**Note:** _You can read more about GS DevOps Mate and it's features in a series of blog posts here, watch this demo and also feel free to watch this webinar._
+**Note:** _You can read more about GS DevOps Mate and it's features in a series of blog posts [here](https://www.gscloudsolutions.com/blogpost/GS-DevOps-Mate-Series-Intro?blogpost=true), watch [this demo](https://www.youtube.com/watch?v=zUpfSPRp_io) and also feel free to watch [this webinar](https://www.youtube.com/watch?v=zUpfSPRp_io)._
 
 # For TL;DR: How to quickly set it up on your BitBucket Pipelines
 
@@ -256,13 +256,14 @@ Please refer to the examples above for Pipeline variables.
 # Roadmap:
 
 ### In Progress: :gear:
- - [ ] Quick Deployment after validation
+ - [x] Quick Deployment after validation
 
 ### High Priority: :rocket:
 - [ ] Scratch Org Creation Notification on Slack with the url to login for scenarios where Devs/QAs want to test in Scratch Orgs
-- [ ] Support for PMD based Static Code Analysis for Apex and VF
-- [ ] Support for ESLint based Static Code Analysis for LWCs
-- [ ] Enhancements to ChangeSet Retrieval to support Custom Objects in MDAPI format and Custom Labels, Workflows and Profiles in both MDAPI and Source(SFDX) format
+- [x] Support for PMD based Static Code Analysis for Apex and VF
+- [x] Support for ESLint based Static Code Analysis for LWCs
+- [x] Enhancements to ChangeSet Retrieval to support Custom Labels, Workflows and Profiles Source(SFDX) format  
+- [ ] Enhancements to ChangeSet Retrieval to support Custom Objects, Custom Labels, Workflows and Profiles in MDAPI format
 - [ ] Eager Artifact Picking to release branches. Useful for Feature branch(GitHub) and Trunk based Git workflows 
 - [ ] Improvements to Package Creation Command: 1. Merge the sfDeploymentInfo command into the sfPackages command 
 
