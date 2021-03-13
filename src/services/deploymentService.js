@@ -616,7 +616,7 @@ const deploymentProcessor = {
         }
         else {
             logger.info('Not Updating the deployment Info in the target org, as it is a bypass');
-            return new Promise((resolve, reject)=>{ response(deploymentRes); });
+            return new Promise((resolve, reject)=>{ resolve(deploymentRes); });
         }
     },
 
