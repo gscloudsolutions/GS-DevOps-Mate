@@ -10,7 +10,7 @@
 */
 const shellJS = require('shelljs');
 
-const logger = require('./utils/logger');
+const logger = require('./logger');
 
 const getSHARevision = (projectPath, shaTag) => {
     const currentDirectory = shellJS.exec('pwd').stdout;

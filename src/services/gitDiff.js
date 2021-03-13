@@ -13,8 +13,8 @@ const shellJS = require('shelljs');
 const fsExtra = require('fs-extra');
 const path = require('path');
 
-const util = require('./manifestUtil');
-const logger = require('./utils/logger');
+const util = require('../utils/manifestUtil');
+const logger = require('../utils/logger');
 
 const modifiedItems = [];
 const renamedItems = [];
@@ -78,6 +78,7 @@ const generateGitDiffList = (output) => {
  * @param {*} repoPath
  * @param {*} nextCommit
  * @param {*} previousCommit
+ * @param {*} sfdxrepo
  */
 const prepareDiffItemsList = (repoPath, nextCommit, previousCommit, sfdxrepo) => new Promise(
     (resolve, reject) => {
@@ -204,6 +205,7 @@ const copyDiffContent = (repoPath, diffProjectPath) => new Promise((resolve, rej
           || element.includes('.trigger-meta.xml')
           || element.includes('.page-meta.xml')
           || element.includes('.component-meta.xml')
+          || element.includes('.email-meta.xml') //TODO: Support this dynamically like line 192
             ) {
                 const filePath = element.replace('-meta.xml', '');
                 fsExtra.copySync(`${repoPath}/${filePath}`, `${diffProjectPath}/${filePath}`);
@@ -274,6 +276,8 @@ const copyDiffContent = (repoPath, diffProjectPath) => new Promise((resolve, rej
  * @param {*} diffProjectPath
  * @param {*} nextCommit
  * @param {*} previousCommit
+ * @param {*} sfdxrepo
+ * @param {*} artifactslocation
  */
 const prepareDiffProject = (
     repoPath,

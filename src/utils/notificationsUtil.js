@@ -57,7 +57,7 @@ const calculateOverallCodeCoverage = (outputJSON, minCoverage = 75) => {
 };
 
 const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, codeCoverageResult, isValidation, buildInfo, notificationTitle) => {
-    const outputJSON = JSON.parse(stdout);
+    const outputJSON = stdout;
 
     const validation = (isValidation === true || isValidation === 'true') ? 'validation' : '';
     const title = notificationTitle ? `${notificationTitle} Failed` : `Build ${validation} Failed`;
@@ -268,7 +268,19 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
 };
 
 // eslint-disable-next-line max-len
-const generateFailureNotificationForSlack = async (stdout, minCodeCoveragePerCmp = 75, codeCoverageResult, isValidation, notificationTitle) => ciCDProviderMessaging[ciCDProvider].getBuildInfo().then(buildInfo => createFailureNotificationForSlack(stdout, minCodeCoveragePerCmp = 75, codeCoverageResult, isValidation, buildInfo, notificationTitle));
+const generateFailureNotificationForSlack = 
+async (stdout, minCodeCoveragePerCmp = 75, 
+    codeCoverageResult, 
+    isValidation, 
+    notificationTitle) => 
+    ciCDProviderMessaging[ciCDProvider].getBuildInfo()
+    .then(buildInfo => createFailureNotificationForSlack(stdout, 
+        minCodeCoveragePerCmp = 75, 
+        codeCoverageResult, 
+        isValidation, 
+        buildInfo, 
+        notificationTitle)
+    );
 
 const createSuccessNotificationForSlack = (codeCoverageResult, isValidation, buildInfo, notificationTitle) => {
     logger.debug(buildInfo);

@@ -14,10 +14,13 @@
 FROM node:lts-alpine
 # Install necessary tools.
 RUN apk add --update --no-cache git openssh ca-certificates openssl curl
+
+RUN apk --no-cache add openjdk11 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 RUN apk add --no-cache --virtual .pipeline-deps readline linux-pam \
   && apk add bash sudo shadow \
   && apk del .pipeline-deps
 
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm
 
 # Specifying a Working directory
 # RUN mkdir /tmp/gs_alm
@@ -41,7 +44,15 @@ RUN npm install
 # Install a specific version of SFDX, instead of installing the latest version as
 # we wanted to make sure that all the commands in the tool are well tested and then
 # only specify the latest tested sfdx version here.
-RUN npm install sfdx-cli@7.71.0 --global
+RUN npm install sfdx-cli@7.90.2 --global
+# ------Install other global dependencies-----
+# For LWC testing, Apex Documentation and Static Code Analysis
+RUN npm install @salesforce/sfdx-lwc-jest@0.11.0 @cparra/apexdocs@1.11.0 --global
+RUN npm install install @babel/eslint-parser --global
+RUN npm install install @babel/core --global
+RUN npm install install @lwc/eslint-plugin-lwc --global
+
+RUN sfdx plugins:install @salesforce/sfdx-scanner@2.6.0
 
 COPY ./ ./
 

@@ -13,19 +13,39 @@
 const shellJS = require('shelljs');
 const path = require('path');
 const fs = require('fs-extra');
-const program = require('commander');
-const authenticate = require('./authenticate');
-const logger = require('./utils/logger');
+
+const logger = require('../utils/logger');
+const fetchRootPath = require('../main').fetchRootPath;
 
 const NO_RECORD_FOUND_ERROR_CODE = 21;
 const NO_SETTINGS_FOUND_ERROR_CODE = 22;
+
+/**
+ * @description      : To get Deployment Info Record
+ * @param command    : Nodejs Program Command
+ * @author           : Groundswell Cloud Solutions
+ */
+const getObject = function(command){
+
+    const deploymentInfoPath = path.dirname(__dirname);
+
+    logger.debug('deploymentInfoPath: ', deploymentInfoPath);
+    logger.debug(`pathToStoreDeploymentInfoJSON: ${deploymentInfoPath}/deploymentInfo_${command.buildId}.json`);
+
+    const deploymentInfoObject  = fs.existsSync(`${deploymentInfoPath}/deploymentInfo_${command.buildId}.json`)
+                                ? fs.readJSONSync(`${deploymentInfoPath}/deploymentInfo_${command.buildId}.json`)
+                                : null;
+    logger.debug(`Deployment Info Object::: ${deploymentInfoObject}`);
+    return deploymentInfoObject;
+}
+
 
 
 const getDeploymentInfo = (moduleName, conn, buildId) => new Promise((resolve, reject) => {
     try {
         const pathToStoreDeploymentInfoJSON = path.dirname(__dirname);
         // if (!fs.existsSync(`${pathToStoreDeploymentInfoJSON}/deploymentInfo_${buildId}.json`)) {
-        conn.query(`SELECT Id, Name, Module_Name__c, Git_Tag__c, Commit_SHA__c FROM Deployment_Info__c WHERE Module_Name__c = '${moduleName}' limit 1`, (err, result) => {
+        conn.query(`SELECT Id, Name, Module_Name__c, Git_Tag__c, Commit_SHA__c,Deployment_Id__c FROM Deployment_Info__c WHERE Module_Name__c = '${moduleName}' LIMIT 1`, (err, result) => {
             if (err) {
                 logger.error('errorCode: ', err.errorCode);
                 if (err.errorCode === 'INVALID_TYPE') {
@@ -53,7 +73,12 @@ const getDeploymentInfo = (moduleName, conn, buildId) => new Promise((resolve, r
     }
 });
 
-const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias) => new Promise((resolve, reject) => {
+const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias, deploymentRes) => new Promise((resolve, reject) => {
+
+    let res = JSON.parse(deploymentRes);
+    let result = res.result;
+
+
     getDeploymentInfo(moduleName, connection)
         .then((response) => {
             logger.debug(`moduleName: ${moduleName}, commitSHA: ${commitSHA}, tag: ${tag}, accessToken: ${connection.accessToken}, alias: ${alias}`);
@@ -70,9 +95,14 @@ const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias) => 
                 if (tag) {
                     recordDetails += `Git_Tag__c=${tag} `;
                 }
-                if (commitSHA) {
-                    recordDetails += `Commit_SHA__c=${commitSHA}`;
+                if (commitSHA && !result.checkOnly) {
+                    recordDetails += `Commit_SHA__c=${commitSHA} `;
                 }
+
+                if(result.checkOnly){
+                    recordDetails += `Deployment_Id__c=${result.id}`;
+                }
+
                 logger.debug('recordDetails: ', recordDetails);
                 shellJS.exec(`SFDX_JSON_TO_STDOUT=true sfdx force:data:record:update -s Deployment_Info__c -i ${response.records[0].Id} -v "${recordDetails}" -u ${targetUserName} --json`,
                     (code, stdout, stderr) => {
@@ -85,7 +115,7 @@ const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias) => 
                     });
             } else if (response === NO_SETTINGS_FOUND_ERROR_CODE) { // Settings does not exist
                 logger.debug('No DeploymentInfo settings found');
-                const deploymentInfoModulePath = path.join(path.dirname(__dirname), 'DeploymentInfo');
+                const deploymentInfoModulePath = path.join(path.dirname(fetchRootPath()), 'DeploymentInfo');
                 logger.debug('deploymentInfoModulePath: ', deploymentInfoModulePath);
                 const output = shellJS.exec(`sfdx force:mdapi:deploy -d ${deploymentInfoModulePath} -u ${targetUserName} --json -w -1`);
                 if (output === '') {
@@ -129,100 +159,28 @@ const updateDeploymentInfoByName = (moduleName, commitSHA,
         });
 });
 
-// Various Command Definitions and Actions for Deployment Info Custom Settings
-program
-    .description('Set of commands to CRU for Deployment Info Custom Settings');
-
-program
-    .command('get')
-    .description('Get the Commit SHA/Commit Tag for latest deployment in a target org')
-    .option('-n --module <name>', 'modulename to get its latest state in the target')
-    .option('-u --targetUserName <uname>', 'username/alias/access token for the target org.')
-    .option('-i --buildId <id>', 'buildId/buildnumber to distinguish the deployment info in the target org.')
-    .option('-s --password <secret>', 'password for the target org add secret token as well if the target system is not open for the ip ranges.')
-    .option('-t --envType <type>', 'either SANDBOX, PRODUCTION, DEVELOPER or SCRATCH')
-    .action((command) => {
-        // TODO: Add Required fields validation
-        // if (command.password) {
-        const { module, buildId } = command;
-        logger.debug('module: ', module);
-        logger.debug('buildId: ', buildId);
-        if (!command.envType) {
-            logger.error('-t --envType is required with username-password based deployment');
-            process.exit(1);
-        }
-        authenticate.loginWithCreds(command.targetUserName, command.password, command.envType)
-            .then(connection => getDeploymentInfo(module, connection, buildId))
-            .then((message) => {
-                logger.debug(message);
-                process.exit(0);
-            })
-            .catch((err) => {
-                logger.debug(err);
-                process.exit(1);
-            });
-        /* }else {
-            getDeploymentInfo(command.module, command.targetUserName, command.buildId)
-                .then((message) => {
-                    logger.debug(message);
-                    process.exit(0);
-                })
-                .catch((err) => {
-                    logger.debug(err);
-                    process.exit(1);
-                });
-        } */ // TODO:  Access Token based implementation
-    });
-
-program
-    .command('updateByName')
-    .description('Updates the commit revision value based on the module name passed for a deployment info custom settings record')
-    .option('-n --module <name>', 'module name of the deployment info custom settings record to be updated')
-    .option('-u --targetUserName <uname>', 'username/alias/access token for the target org.')
-    .option('-s --password <secret>', 'password for the target org add secret token as well if the target system is not open for the ip ranges.')
-    .option('-r --revision <sha>', 'short SHA based commit revision.')
-    .option('-t --envType <type>', 'either SANDBOX, PRODUCTION, DEVELOPER or SCRATCH')
-    .action((command) => {
-        const {
-            module, targetUserName, password, envType, revision,
-        } = command;
-        if (password) {
-            logger.debug('module: ', module);
-            if (!command.envType) {
-                logger.error('-t --envType is required with username-password based deployment');
-                process.exit(1);
+const updateDeploymentId = (moduleName, commitSHA,
+    targetUserName) => new Promise((resolve, reject) => {
+    shellJS.exec(`sfdx force:data:record:update -s Deployment_Info__c -w "Module_Name__c='${moduleName}'" -v "Commit_SHA__c='${commitSHA}'" -u ${targetUserName} --json`,
+        (code, stdout, stderr) => {
+            logger.debug('Status Code: ', code);
+            if (code !== 0) {
+                logger.error(stderr);
+                reject(stderr);
             }
-            authenticate.loginWithCreds(targetUserName, password, envType)
-                .then((connection) => {
-                    // set the url configuration, required in case of running sfdx commands with access token
-                    shellJS.exec(`sfdx force:config:set instanceUrl=${connection.instanceURL} --global`);
-                    return updateDeploymentInfoByName(module, revision, connection.accessToken);
-                })
-                .then((message) => {
-                    logger.debug(message);
-                    process.exit(0);
-                })
-                .catch((err) => {
-                    logger.debug(err);
-                    process.exit(1);
-                });
-        } else {
-            updateDeploymentInfoByName(module, revision, targetUserName)
-                .then((message) => {
-                    logger.debug(message);
-                    process.exit(0);
-                })
-                .catch((err) => {
-                    logger.error(err);
-                    process.exit(1);
-                });
-        }
-    });
+            // const resultJSON = JSON.parse(stdout, true);
+            // logger.debug('deploymentInfoService.js: updateDeploymentInfoByName: resultJSON: ', resultJSON);
+            // resolve(resultJSON.result);
+            resolve('Existing Deployment_Info__c record got updated');
+        });
+});
+
+
 
 // Export methods
 module.exports = {
+    getObject,
     getDeploymentInfo,
     updateDeploymentInfo,
+    updateDeploymentInfoByName
 };
-
-program.parse(process.argv);

@@ -12,143 +12,12 @@
 */
 
 const program = require('commander');
-
-const path = require('path');
-const fs = require('fs-extra');
 const shellJS = require('shelljs');
 
-const artifactCreator = require('./packageCreationService');
-const secondGenPackaging = require('./services/secondGenPackagingService');
-const gitDiff = require('./gitDiff');
-const logger = require('./utils/logger');
-const notify = require('./utils/notificationsUtil');
-
-const MULTI_PACKAGE_NAME = process.env.MDAPI_PACKAGE_GROUP_NAME ? process.env.MDAPI_PACKAGE_GROUP_NAME : 'metadatapackage-group';
-const MDAPI_PACKAGE_NAME = process.env.MDAPI_PACKAGE_NAME ? process.env.MDAPI_PACKAGE_NAME : 'mdapiPackage';
-const SLACK_WEBHOOK_URL = process.env.SLACK_NOTIFICATION_URI ? process.env.SLACK_NOTIFICATION_URI : null;
-
-
-// Variable to hold the location of the project for which deployable
-// metadata packages would be created or from where source
-// based modular deployments take place
-let projectPath = process.env.PROJECT_PATH || '.';
-let projectLocation = projectPath;
-logger.debug(`Code is executing in ${__dirname} directory`);
-const diffProjectPath = path.join(path.dirname(__dirname), '/DiffProject');
-logger.debug(`Location to store diff files, diffProjectPath: ${diffProjectPath}`);
-
-const promiseMethod = message => new Promise((resolve) => {
-    resolve(message);
-});
-
-const createPackage = (command, type, artifactCreationMethod) => {
-    let { oldCommit } = command;
-    const { newCommit } = command;
-    if (!command.artifactsLocation) {
-        logger.error('-p --artifactsLocation is a required param');
-        process.exit(1);
-    }
-    if (command.projectLocation) {
-        projectPath = command.projectLocation;
-        projectLocation = command.projectLocation;
-    }
-    logger.debug(`${type}: `, command);
-    const artifactsLocation = path.join(command.artifactsLocation, '/Artifacts');
-    logger.debug(`${type}: Location to store artifacts, artifactsLocation: ${artifactsLocation}`);
-    logger.debug(`${type}: command.newCommit: `, command.newCommit);
-    logger.debug(`${type}: command.oldCommit: `, command.oldCommit);
-
-    // If it is not a full deployment, then only check for deploymentInfo
-    // in the target org to get the previous commit
-    if (!oldCommit && newCommit) {
-        logger.debug(`${type}: commit to compare to be pulled from the org`);
-        const deploymentInfoPath = path.dirname(__dirname);
-        logger.debug(`${type}: deploymentInfo.json path with name of the file : ${deploymentInfoPath}/deploymentInfo_${command.buildId}.json`);
-        if (fs.existsSync(`${deploymentInfoPath}/deploymentInfo_${command.buildId}.json`)) {
-            const deploymentInfoObject = fs.readJSONSync(`${deploymentInfoPath}/deploymentInfo_${command.buildId}.json`);
-            oldCommit = deploymentInfoObject.Commit_SHA__c;
-            logger.debug(`${type}: oldCommit: `, oldCommit);
-        }
-    }
-
-    // prepare the package version based on old and new CommitSHAs
-    logger.debug(`${type}:  Before createPackageVersion: `);
-    const packageVersion = artifactCreator.createPackageVersions(command.packageVersion, oldCommit,
-        newCommit, projectLocation);
-    logger.debug(`${type}:  packageVersion: `, packageVersion);
-
-    // Create package only if it does not exists
-    let packageNameWithoutVersion = MULTI_PACKAGE_NAME;
-    packageNameWithoutVersion = type === 'source-combined' || type === 'mdapi' ? MDAPI_PACKAGE_NAME : MULTI_PACKAGE_NAME;
-    if (fs.existsSync(`${artifactsLocation}/${packageNameWithoutVersion}-${packageVersion}`)) {
-    // Do nothing
-        logger.debug(`${packageNameWithoutVersion}-${packageVersion} Package exists`);
-    } else if ((!newCommit && !oldCommit)
-    || (newCommit && !command.packageVersion && !oldCommit)
-        || command.full === 'true'
-        || command.full === true) {
-        // Both the old and new commit params if not passed
-        // Or new commit is passed but there is no package version being passed and old commit is
-        // not passed, this basically  signifies the command is expecting the diff based on commit SHA
-        // stored in the target Org
-        // Or Full flag if passed as true
-        // Any of these indicates for a full package creation
-        logger.debug(`${type}: Full Package creation`);
-        logger.debug(`${type}: createMultipleArtifacts will be called in next line`);
-
-        promiseMethod(`${type}`)
-            .then((message) => {
-                logger.debug(`${message} is being processed`);
-                if (type === 'source-multi' || type === 'source-combined') {
-                    return artifactCreationMethod(projectLocation, artifactsLocation, packageVersion);
-                }
-
-                return artifactCreationMethod(projectLocation, artifactsLocation, packageVersion, false);
-            })
-            .then((message) => {
-                logger.debug(`${type}: createMultipleArtifacts: `, message);
-                process.exit(0);
-            })
-            .catch((error) => {
-                logger.error(`${type}: `, error);
-                notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
-                process.exit(1);
-            });
-    } else {
-        logger.debug(`${type}: Diff Package creation`);
-        projectLocation = diffProjectPath;
-        logger.debug(`${type}: diffProjectPath: `, diffProjectPath);
-        logger.debug(`${type}: prepareDiffProject will be called in next line`);
-        logger.debug(`${type}: `, oldCommit);
-        let sourceFormat = false;
-        sourceFormat = type === 'source-multi' || type === 'source-combined';
-        gitDiff.prepareDiffProject(projectPath,
-            diffProjectPath, command.newCommit, oldCommit, sourceFormat, artifactsLocation)
-            .then((message) => {
-                const doGitDiff = true;
-                logger.debug(`${type}: `, message);
-                if (type === 'source-multi' || type === 'source-combined') {
-                    logger.debug(`${type}: createMultipleArtifacts will be called in next line`);
-                    return artifactCreationMethod(
-                        projectLocation, artifactsLocation, packageVersion,
-                    );
-                }
-                logger.debug(`${type}: createMDAPIPackageArtifact will be called in next line`);
-                return artifactCreationMethod(
-                    projectLocation, artifactsLocation, packageVersion, doGitDiff,
-                );
-            })
-            .then((message) => {
-                logger.debug(`${type}: `, message);
-                process.exit(0);
-            })
-            .catch((error) => {
-                logger.error(`${type}: `, error);
-                notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
-                process.exit(1);
-            });
-    }
-};
+const artifactCreator = require('../services/packageCreationService');
+const secondGenPackaging = require('../services/secondGenPackagingService');
+const logger = require('../utils/logger');
+const notify = require('../utils/notificationsUtil');
 
 // Various Command Definitions and Actions for Artifacts/Packages creation
 program
@@ -165,7 +34,7 @@ program
     .option('-l --projectLocation <pLocation>', 'The path of the project or repository.')
     .option('-i --buildId <id>', 'Build-Id/Build-Number for uniquely identifying the deployment information.')
     .action((command) => {
-        createPackage(command, 'source-multi', artifactCreator.createMultipleArtifacts);
+        artifactCreator.createPackage(command, 'source-multi', artifactCreator.createMultipleArtifacts);
     });
 
 // Combined/Single Artifacts/Packages creation for a SFDX Repo/Directory
@@ -180,7 +49,7 @@ program
     .option('-i --buildId <id>', 'Build-Id/Build-Number for uniquely identifying the deployment information.')
     .option('-f --full <full>', 'This flag will override everything and go for a full deployment')
     .action((command) => {
-        createPackage(command, 'source-combined', artifactCreator.createCombinedArtifact);
+        artifactCreator.createPackage(command, 'source-combined', artifactCreator.createCombinedArtifact);
     });
 
 // Artifact/Package Creation for a Non-SFDX Repo/Directory
@@ -195,7 +64,7 @@ program
     .option('-i --buildId <id>', 'Build-Id/Build-Number for uniquely identifying the deployment information.')
     .option('-f --full <full>', 'This flag will override everything and go for a full deployment')
     .action((command) => {
-        createPackage(command, 'mdapi', artifactCreator.createMDAPIPackageArtifact);
+        artifactCreator.createPackage(command, 'mdapi', artifactCreator.createMDAPIPackageArtifact);
     });
 
 program
