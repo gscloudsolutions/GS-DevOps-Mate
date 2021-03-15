@@ -212,52 +212,62 @@ function prepareAndCallMDDeployCommand(artifactPath, targetUserName,
 
 
 const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, testsToRun, uri, minCodeCoverage, notificationTitle) => {
-     if (!fs.existsSync(artifactPath) && !fs.existsSync(`${artifactPath}.zip`)) {
-         logger.debug(`Either there is nothing to be deployed or something went wrong with the package creation process, please check the logs for package creation step.`);
-         // process.exit(0);
-         resolve('Either there is nothing to be deployed or something went wrong with the package creation process,please check the logs for package creation step.');
-     }
-
-    let runSpecifiedTests = false;
-
-    if ((testLevel !== 'NoTestRun' && testLevel !== 'RunLocalTests' && testLevel !== 'RunAllTestsInOrg')
-        && (fs.existsSync(`${artifactPath}/classes`) || testLevel === 'RunSpecifiedTests')) {
-        runSpecifiedTests = true;
+    try {
+        if (!fs.existsSync(artifactPath) && !fs.existsSync(`${artifactPath}.zip`)) {
+            logger.debug(`Either there is nothing to be deployed or something went wrong with the package creation process, please check the logs for package creation step.`);
+            // process.exit(0);
+            return new Promise((resolve, reject) => {
+                resolve('Either there is nothing to be deployed or something went wrong with the package creation process,please check the logs for package creation step.');
+            });   
+        }
+   
+        let runSpecifiedTests = false;
+   
+        if ((testLevel !== 'NoTestRun' && testLevel !== 'RunLocalTests' && testLevel !== 'RunAllTestsInOrg')
+           && (fs.existsSync(`${artifactPath}/classes`) || testLevel === 'RunSpecifiedTests')) {
+           runSpecifiedTests = true;
+        }
+   
+        if (ZIPPED_ARTIFACT === true || (ZIPPED_ARTIFACT && ZIPPED_ARTIFACT.toLowerCase() === 'true')) {
+            extract(`${artifactPath}.zip`,
+               { dir: `${artifactPath}` },
+               (err) => {
+                   if (err) {
+                       logger.error(err);
+                       return new Promise((resolve, reject) => {
+                           reject(err);
+                       });
+                   }
+                   // logger.debug('instanceUrl: ');
+                   logger.debug('list everything in the artifact created');
+                   shellJS.exec(`ls -a ${artifactPath}`);
+                   return deploy.setTestsAndDeploy( artifactPath,
+                                           targetUserName,
+                                           validate,
+                                           testLevel,
+                                           testsToRun,
+                                           runSpecifiedTests,
+                                           uri,
+                                           notificationTitle);
+               });
+        } else {
+           logger.debug('No zipped artifact required.....');
+           return deploy.setTestsAndDeploy( artifactPath,
+                                   targetUserName,
+                                   validate,
+                                   testLevel,
+                                   testsToRun,
+                                   runSpecifiedTests,
+                                   uri,
+                                   notificationTitle);
+        }
+    } catch(err) {
+        return new Promise((resolve, reject) => {
+            logger.error(err);
+            reject(err);
+        });
     }
-
-    if (ZIPPED_ARTIFACT === true || (ZIPPED_ARTIFACT && ZIPPED_ARTIFACT.toLowerCase() === 'true')) {
-        extract(`${artifactPath}.zip`,
-            { dir: `${artifactPath}` },
-            (err) => {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                // logger.debug('instanceUrl: ');
-                logger.debug('list everything in the artifact created');
-                shellJS.exec(`ls -a ${artifactPath}`);
-                return deploy.setTestsAndDeploy( artifactPath,
-                                        targetUserName,
-                                        validate,
-                                        testLevel,
-                                        testsToRun,
-                                        runSpecifiedTests,
-                                        uri,
-                                        notificationTitle);
-            });
-    }
-
-    else {
-        logger.debug('No zipped artifact required.....');
-        return deploy.setTestsAndDeploy( artifactPath,
-                                targetUserName,
-                                validate,
-                                testLevel,
-                                testsToRun,
-                                runSpecifiedTests,
-                                uri,
-                                notificationTitle);
-    }
+    
  }
 
 
@@ -312,7 +322,7 @@ const deploy = {
             })
             .catch( error => {
                 logger.error(error);
-                process.exit(1);
+                reject(error);
             });
 
         });
