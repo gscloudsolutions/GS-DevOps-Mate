@@ -14,6 +14,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const tableify = require('tableify');
 const colors = require('colors');
+const type = require('type-detect');
 
 const logger = require('../utils/logger');
 
