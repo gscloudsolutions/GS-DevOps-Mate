@@ -187,6 +187,7 @@ function prepareAndCallMDDeployCommand(artifactPath, targetUserName,
 
             shellJS.exec(command, {silent: false}, (status, stdout, stderr) => {
                 logger.debug('status: ', status);
+                logger.debug('stdout: ', stdout);
                 resultsJSObject = JSON.parse(stdout);
                 if (status === 0) {
                     // Generate Success Release Notes as Artifacts
