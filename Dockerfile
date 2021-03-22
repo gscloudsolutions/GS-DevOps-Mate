@@ -44,7 +44,7 @@ RUN npm install
 # Install a specific version of SFDX, instead of installing the latest version as
 # we wanted to make sure that all the commands in the tool are well tested and then
 # only specify the latest tested sfdx version here.
-RUN npm install sfdx-cli@7.90.2 --global
+RUN npm install sfdx-cli@7.92.0 --global
 # ------Install other global dependencies-----
 # For LWC testing, Apex Documentation and Static Code Analysis
 RUN npm install @salesforce/sfdx-lwc-jest@0.11.0 @cparra/apexdocs@1.11.0 --global
