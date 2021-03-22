@@ -291,7 +291,11 @@ const deploy = {
             getTestsClasses(artifactPath)
             .then( files => {
                 /* --- Henry: CRITICAL THIS IS A SINGLE COMMA WITH NO SPACE. SPACE WILL BREAK IT ---*/
-                const  allTests = [testsToRun, files].join(',');
+                let testsToRunList = [];
+                if(testsToRun) {
+                    testsToRunList = testsToRun.split(',');
+                }
+                const  allTests = [...testsToRunList, ...files].join(',');
 
                 logger.debug(allTests);
                 logger.debug('uri: ', uri);

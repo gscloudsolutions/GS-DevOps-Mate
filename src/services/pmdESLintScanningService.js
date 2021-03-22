@@ -77,60 +77,63 @@ const transformAndSortBySeverity = (results) => {
     let severityThreeResults = []; 
     let severityFourResults = [];
     let severityFiveResults = [];
-    results.forEach(result => {
-        logger.trace(result);
-        if(result.violations) {
-            result.violations.forEach(violation => {
-                switch(violation.severity) {
-                    case 1: 
-                    case '1':
-                    severityOneResults.push(new transformedRow (result.fileName,
-                        violation.line, 
-                        violation.column,
-                        violation.ruleName,
-                        violation.message,
-                        violation.severity));
-                    break;
-                    case 2:
-                    case '2': 
-                    severityTwoResults.push(new transformedRow (result.fileName,
-                        violation.line, 
-                        violation.column,
-                        violation.ruleName,
-                        violation.message,
-                        violation.severity));
-                    break;
-                    case 3:
-                    case '3': 
-                    severityThreeResults.push(new transformedRow (result.fileName,
-                        violation.line, 
-                        violation.column,
-                        violation.ruleName,
-                        violation.message,
-                        violation.severity));
-                    break;
-                    case 4:
-                    case '4':
-                    severityFourResults.push(new transformedRow (result.fileName,
-                        violation.line, 
-                        violation.column,
-                        violation.ruleName,
-                        violation.message,
-                        violation.severity));
-                    break;
-                    default:
-                    severityFiveResults.push(new transformedRow (result.fileName,
-                        violation.line, 
-                        violation.column,
-                        violation.ruleName,
-                        violation.message,
-                        violation.severity));
-                }
-                
-                
-            });
-        }
-    });
+    if(results) {
+        results.forEach(result => {
+            logger.trace(result);
+            if(result.violations) {
+                result.violations.forEach(violation => {
+                    switch(violation.severity) {
+                        case 1: 
+                        case '1':
+                        severityOneResults.push(new transformedRow (result.fileName,
+                            violation.line, 
+                            violation.column,
+                            violation.ruleName,
+                            violation.message,
+                            violation.severity));
+                        break;
+                        case 2:
+                        case '2': 
+                        severityTwoResults.push(new transformedRow (result.fileName,
+                            violation.line, 
+                            violation.column,
+                            violation.ruleName,
+                            violation.message,
+                            violation.severity));
+                        break;
+                        case 3:
+                        case '3': 
+                        severityThreeResults.push(new transformedRow (result.fileName,
+                            violation.line, 
+                            violation.column,
+                            violation.ruleName,
+                            violation.message,
+                            violation.severity));
+                        break;
+                        case 4:
+                        case '4':
+                        severityFourResults.push(new transformedRow (result.fileName,
+                            violation.line, 
+                            violation.column,
+                            violation.ruleName,
+                            violation.message,
+                            violation.severity));
+                        break;
+                        default:
+                        severityFiveResults.push(new transformedRow (result.fileName,
+                            violation.line, 
+                            violation.column,
+                            violation.ruleName,
+                            violation.message,
+                            violation.severity));
+                    }
+                    
+                    
+                });
+            }
+        });
+    }
+    
     transformedResults = [...severityOneResults, 
         ...severityTwoResults,
         ...severityThreeResults,
