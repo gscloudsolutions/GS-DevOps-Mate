@@ -77,7 +77,7 @@ const transformAndSortBySeverity = (results) => {
     let severityThreeResults = []; 
     let severityFourResults = [];
     let severityFiveResults = [];
-    if(results) {
+    if(results && type(results) === 'Array') {
         results.forEach(result => {
             logger.trace(result);
             if(result.violations) {
@@ -132,6 +132,8 @@ const transformAndSortBySeverity = (results) => {
                 });
             }
         });
+    } else if(results) {
+        logger.info(results);
     }
     
     transformedResults = [...severityOneResults, 
