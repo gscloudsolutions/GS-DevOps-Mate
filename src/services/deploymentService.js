@@ -185,7 +185,7 @@ function prepareAndCallMDDeployCommand(artifactPath, targetUserName,
             logger.debug('command: ', command);
 
 
-            shellJS.exec(command, {silent: false}, (status, stdout, stderr) => {
+            shellJS.exec(command, {silent: true}, (status, stdout, stderr) => {
                 logger.debug('status: ', status);
                 logger.debug('stdout: ', stdout);
                 resultsJSObject = JSON.parse(stdout);
