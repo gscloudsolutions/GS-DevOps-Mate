@@ -11,26 +11,36 @@ const ciCDSpecificMessaging = {
                 prURL = `${process.env.BITBUCKET_GIT_HTTP_ORIGIN}/pull-requests/${process.env.BITBUCKET_PR_ID}`;
                 buildReason = 'Pull Request';
             }
-
-            const response = await axios.get(`https://api.bitbucket.org/2.0/users/${process.env.BITBUCKET_STEP_TRIGGERER_UUID}`);
-            logger.debug('response: ', response.data);
+            let DISPLAY_NAME = 'Scheduled Pipeline';
+            let AUTHOR_AVATAR = null;
+            if(process.env.BITBUCKET_STEP_TRIGGERER_UUID) {
+                const response = await axios.get(`https://api.bitbucket.org/2.0/users/${process.env.BITBUCKET_STEP_TRIGGERER_UUID}`);
+                logger.debug('response: ', response.data);
+                DISPLAY_NAME = response.data.display_name;
+                AUTHOR_AVATAR = response.data.links.avatar.href;
+            }
+            
 
             const steps = process.env.HOSTNAME.split('-');
             steps.pop();
             const stepId = steps.join('-');
             logger.debug('stepId: ', stepId);
 
-            return {
+            buildInfo = {
                 BuildName: process.env.BITBUCKET_BUILD_NUMBER,
                 BuildResultsURL: `${process.env.BITBUCKET_GIT_HTTP_ORIGIN}/addon/pipelines/home#!/results/${process.env.BITBUCKET_BUILD_NUMBER}`,
-                BuildAuthorName: response.data.display_name,
-                BuildAuthorAvatar: response.data.links.avatar.href,
+                BuildAuthorName: DISPLAY_NAME,
                 BuildSourceBranch: process.env.BITBUCKET_BRANCH,
                 BuildSourceBranchURL: sourceBranchURL,
                 PRUrl: prURL,
                 BuildReason: buildReason,
                 ArtifactPath: `${process.env.BITBUCKET_GIT_HTTP_ORIGIN}/addon/pipelines/home#!/results/${process.env.BITBUCKET_BUILD_NUMBER}/steps/{${stepId}}/artifacts`,
             };
+            if(AUTHOR_AVATAR) {
+                buildInfo.BuildAuthorAvatar =  AUTHOR_AVATAR;
+            }
+                
+            return buildInfo;
         },
     },
 
