@@ -36,9 +36,9 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
     // we are not calling force:apex:test:report anymore because the flag -r json returns back with the full test result.
     // this is undocumented in the sfdx CLI, but since it works, we are making the assumption this is working by design.
     logger.debug('runApexTests.js ::', 'Running command ::',
-        `sfdx force:apex:test:run -u ${alias} -l ${testType} -r json -d ${filePath} ${testType === testLevel.SPECIFIED_TESTS ? ` -n ${testClasses}` : ''}`);
+        `SFDX_IMPROVED_CODE_COVERAGE='true' sfdx force:apex:test:run -u ${alias} -l ${testType} -r json -d ${filePath} ${testType === testLevel.SPECIFIED_TESTS ? ` -n ${testClasses}` : ''}`);
 
-    let submission = shellJS.exec(`sfdx force:apex:test:run -u ${alias} -l ${testType} -r json -d ${filePath} -c -w 20 ${testType === testLevel.SPECIFIED_TESTS ? `-n ${testClasses}` : ''}`,
+    let submission = shellJS.exec(`SFDX_IMPROVED_CODE_COVERAGE='true' sfdx force:apex:test:run -u ${alias} -l ${testType} -r json -d ${filePath} -c -w 20 ${testType === testLevel.SPECIFIED_TESTS ? `-n ${testClasses}` : ''}`,
         {
             silent: true,
         });
