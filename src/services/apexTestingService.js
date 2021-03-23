@@ -11,6 +11,7 @@
 const shellJS = require('shelljs');
 const fs = require('fs-extra');
 const errorUtil = require('../utils/errorUtil');
+const logger = require('../utils/logger');
 
 const testLevel = {
     LOCAL_TESTS: 'RunLocalTests',
@@ -31,10 +32,10 @@ const testLevel = {
  * @return Promise<JSON> - Returns a JSON of test run results, containing a status code and test results with coverage
  */
 const getTestSubmission = (testType, alias, filePath, testClasses = null) => new Promise((resolve, reject) => {
-    console.log('runApexTests.js :: submitting test');
+    logger.debug('runApexTests.js :: submitting test');
     // we are not calling force:apex:test:report anymore because the flag -r json returns back with the full test result.
     // this is undocumented in the sfdx CLI, but since it works, we are making the assumption this is working by design.
-    console.log('runApexTests.js ::', 'Running command ::',
+    logger.debug('runApexTests.js ::', 'Running command ::',
         `sfdx force:apex:test:run -u ${alias} -l ${testType} -r json -d ${filePath} ${testType === testLevel.SPECIFIED_TESTS ? ` -n ${testClasses}` : ''}`);
 
     let submission = shellJS.exec(`sfdx force:apex:test:run -u ${alias} -l ${testType} -r json -d ${filePath} -c -w 20 ${testType === testLevel.SPECIFIED_TESTS ? `-n ${testClasses}` : ''}`,
@@ -44,16 +45,16 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
     if (submission.stderr !== '') {
         errorUtil.handleStderr(submission.stderr)
             .then((result) => {
-                console.log('runApexTests.js :: ', result);
+                logger.debug('runApexTests.js :: ', result);
                 reject(result);
             })
             .catch((error) => {
-                console.log('runApexTests.js :: ', 'CATCH :: Unexpected error received!');
+                logger.debug('runApexTests.js :: ', 'CATCH :: Unexpected error received!');
                 reject(error);
             });
     } else {
         submission = JSON.parse(submission.stdout);
-        console.log('runApexTests.js ::', submission.status);
+        logger.debug('runApexTests.js ::', submission.status);
         if (submission.status === 0) {
             resolve(submission);
         }
@@ -100,13 +101,13 @@ const checkTestCoverage = (result, minimum = 75) => new Promise((resolve, reject
         const orgCoverage = parseFloat(result.result.summary.orgWideCoverage);
 
         if (testCoverage < minimum) {
-            console.log('runApexTests.js :: ', 'checkTestCoverage :: ', `test coverage for specified tests is <${minimum}`);
+            logger.debug('runApexTests.js :: ', 'checkTestCoverage :: ', `test coverage for specified tests is <${minimum}`);
             // eslint-disable-next-line no-param-reassign
             result.status = 1;
             reject(result);
         }
         if (orgCoverage < minimum) {
-            console.log('runApexTests.js :: ', 'checkTestCoverage :: ', `org wide coverage is <${minimum}`);
+            logger.debug('runApexTests.js :: ', 'checkTestCoverage :: ', `org wide coverage is <${minimum}`);
             // eslint-disable-next-line no-param-reassign
             result.status = 1;
             reject(result);

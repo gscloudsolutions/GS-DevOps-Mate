@@ -14,8 +14,10 @@ const shellJS = require('shelljs');
 const program = require('commander');
 const fs = require('fs-extra');
 
+
 const authenticate = require('../services/authenticationService');
 const apexTestingService = require('../services/apexTestingService');
+const logger = require('../utils/logger');
 
 program
     .description('Set of commands to run test classes on Salesforce.');
@@ -32,19 +34,19 @@ program
     .option('-s, --password <secret>', 'password for the target org add secret token as well if the target system is not open for the ip ranges')
     .option('-t, --envType <type>', 'either SANDBOX, PRODUCTION or SCRATCH')
     .action((command) => {
-        console.log(command.targetusername);
+        logger.debug(command.targetusername);
         fs.ensureDirSync(command.directoryPath);
         if (!Object.keys(apexTestingService.testLevel).includes(command.testLevel)) {
-            console.error('Invalid test level defined!');
+            logger.error('Invalid test level defined!');
             process.exit(1);
         }
         if (!command.targetusername) {
             if (!(command.username && command.password)) {
-                console.error('No JWT alias provided, so username and password are required.');
+                logger.error('No JWT alias provided, so username and password are required.');
                 process.exit(1);
             }
             if (!command.envType) {
-                console.error('-t --envType is required with username-password based deployment');
+                logger.error('-t --envType is required with username-password based deployment');
                 process.exit(1);
             }
             authenticate.loginWithCreds(command.username, command.password, command.envType)
@@ -55,7 +57,7 @@ program
                         command.directoryPath, command.testClasses);
                 })
                 .then((result) => {
-                    console.log('runApexTests.js :: ', result.result.summary);
+                    logger.debug('runApexTests.js :: ', result.result.summary);
                     // write the results to an artifact
                     apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
@@ -64,7 +66,7 @@ program
                     process.exit(result.status);
                 })
                 .catch((error) => {
-                    console.error('runApexTests.js :: ', ' :: ', 'FAILED :: ', error);
+                    logger.error('runApexTests.js :: ', ' :: ', 'FAILED :: ', error);
                     // write the results to an artifact
                     if (error.result && error.result.summary && error.result.summary.testRunId) {
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
@@ -75,7 +77,7 @@ program
             apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], command.targetusername,
                 command.directoryPath, command.testClasses)
                 .then((result) => {
-                    console.log('runApexTests.js :: ', result.result.summary);
+                    logger.debug('runApexTests.js :: ', result.result.summary);
                     // write the results to an artifact
                     apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
@@ -84,7 +86,7 @@ program
                     process.exit(result.status);
                 })
                 .catch((error) => {
-                    console.error('runApexTests.js :: ', ' :: ', 'FAILED ', error);
+                    logger.error('runApexTests.js :: ', ' :: ', 'FAILED ', error);
                     // write the results to an artifact
                     if (error.result && error.result.summary && error.result.summary.testRunId) {
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
