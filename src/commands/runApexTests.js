@@ -25,14 +25,14 @@ program
     .command('runTests')
     .description('Runs specified test classes or levels on target org.')
     .option('-a --targetusername <orgAlias>', 'Username/alias/access token for the target org.')
-    .option('-d --directoryPath <directoryPath>', 'The path to store result artifacts.')
-    .option('-b --buildNumber <integer>', 'Build-Id/Build-Number for uniquely identifying the test instance.')
-    .option('-l --testLevel <testlevel>', 'LOCAL_TESTS|ALL_TESTS|SPECIFIED_TESTS Define which test level to execute.')
-    .option('-n --testClasses <apexClassName>', 'A comma separated list of test classes to run. Required if testLevel is SPECIFIED_TESTS')
-    .option('-m --minimumPercentage <minPercent>', 'Default 75, The minimum test coverage percentage required.')
-    .option('-u --username <username>', 'Username for the target org')
-    .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
-    .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
+    // .option('-d --directoryPath <directoryPath>', 'The path to store result artifacts.')
+    // .option('-b --buildNumber <integer>', 'Build-Id/Build-Number for uniquely identifying the test instance.')
+    // .option('-l --testLevel <testlevel>', 'LOCAL_TESTS|ALL_TESTS|SPECIFIED_TESTS Define which test level to execute.')
+    // .option('-n --testClasses <apexClassName>', 'A comma separated list of test classes to run. Required if testLevel is SPECIFIED_TESTS')
+    // .option('-m --minimumPercentage <minPercent>', 'Default 75, The minimum test coverage percentage required.')
+    // .option('-u --username <username>', 'Username for the target org')
+    // .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
+    // .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
     .action((command) => {
         logger.debug('params:', command);
         fs.ensureDirSync(command.directoryPath);
