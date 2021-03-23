@@ -84,7 +84,7 @@ function getTestsClasses(artifactPath) {
                     logger.debug('testClasses: ', testClasses);
                     logger.debug('testClasses: ', testClasses.toString());
                     if (testClasses.length > 0) {
-                        resolve(testClasses.toString());
+                        resolve(testClasses);
                     }
                     resolve('');
                 })
