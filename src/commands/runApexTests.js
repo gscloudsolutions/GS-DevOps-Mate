@@ -25,7 +25,7 @@ program
     .command('runTests')
     .description('Runs specified test classes or levels on target org.')
     .option('-a --targetusername <orgAlias>', 'Username/alias/access token for the target org.')
-    // .option('-d --directoryPath <directoryPath>', 'The path to store result artifacts.')
+    .option('-d --directoryPath <directoryPath>', 'The path to store result artifacts.')
     // .option('-b --buildNumber <integer>', 'Build-Id/Build-Number for uniquely identifying the test instance.')
     // .option('-l --testLevel <testlevel>', 'LOCAL_TESTS|ALL_TESTS|SPECIFIED_TESTS Define which test level to execute.')
     // .option('-n --testClasses <apexClassName>', 'A comma separated list of test classes to run. Required if testLevel is SPECIFIED_TESTS')
