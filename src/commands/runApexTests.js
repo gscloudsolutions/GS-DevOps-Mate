@@ -29,7 +29,7 @@ program
     .option('-b --buildNumber <integer>', 'BuildId/BuildNumber for uniquely identifying the test instance.')
     .option('-l --testLevel <testlevel>', 'LOCAL_TESTS|ALL_TESTS|SPECIFIED_TESTS Define which test level to execute.')
     .option('-n --testClasses <apexClassName>', 'A comma separated list of test classes to run. Required if testLevel is SPECIFIED_TESTS')
-    // .option('-m --minimumPercentage <minPercent>', 'Default 75, The minimum test coverage percentage required.')
+    .option('-m --minimumPercentage <minPercent>', 'Default 75, The minimum test coverage percentage required.')
     // .option('-u --username <username>', 'Username for the target org')
     // .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
     // .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
@@ -40,6 +40,7 @@ program
         logger.debug('buildNumber:', command.buildNumber);
         logger.debug('testLevel:', command.testLevel);
         logger.debug('testClasses:', command.testClasses);
+        logger.debug('minimumPercentage:', command.minimumPercentage);
         fs.ensureDirSync(command.directoryPath);
         if (!Object.keys(apexTestingService.testLevel).includes(command.testLevel)) {
             logger.error('Invalid test level defined!');
