@@ -598,7 +598,7 @@ const deploymentProcessor = {
                 resolve(message);
             })
             .catch( err => {
-                logger.debug('Eerror :: ',error);
+                logger.debug('Eerror :: ',err);
                 reject(err);
             })
         });
