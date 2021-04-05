@@ -323,7 +323,7 @@ const deploy = {
                     : this.failed( deploymentRes, uri, minBuildCoverage, minCodeCoveragePerCmp, validate, notificationTitle, reject );
             })
             .then( result => {
-                resolve(res);
+                resolve(result);
             })
             .catch( error => {
                 logger.error(error);
@@ -596,6 +596,10 @@ const deploymentProcessor = {
         .then( message =>{
             logger.debug('Message :: ',message);
             process.exit(0);
+        })
+        .catch( err => {
+            logger.debug('Eerror :: ',error);
+            process.exit(1);
         })
 
     },
