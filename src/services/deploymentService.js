@@ -579,28 +579,29 @@ const deploymentProcessor = {
     Description : Run the deployment
     =================================================*/
     mdapiDeploy : function(command, constants, artifact, aliasOrConnection, type, DIRECTORY, projectPath){
-
-        mdapiArtifactDeploy(`${command.artifactpath}/${DIRECTORY}/${artifact.name}`,
-            type=='alias' ? aliasOrConnection : aliasOrConnection.accessToken,
-            command.validate,
-            command.testlevel,
-            command.testsLists,
-            constants.uri,
-            constants.minCodeCoverage,
-            command.notificationTitle)
-        .then( res =>{
-            return type=='alias'
-                ? this.updateDeployInfo(command, res, aliasOrConnection, null, projectPath)
-                : this.updateDeployInfo(command, res, null, aliasOrConnection, projectPath);
-        })
-        .then( message =>{
-            logger.debug('Message :: ',message);
-            process.exit(0);
-        })
-        .catch( err => {
-            logger.debug('Eerror :: ',error);
-            process.exit(1);
-        })
+        new Promise((resolve, reject) => {
+            mdapiArtifactDeploy(`${command.artifactpath}/${DIRECTORY}/${artifact.name}`,
+                type=='alias' ? aliasOrConnection : aliasOrConnection.accessToken,
+                command.validate,
+                command.testlevel,
+                command.testsLists,
+                constants.uri,
+                constants.minCodeCoverage,
+                command.notificationTitle)
+            .then( res =>{
+                return type=='alias'
+                    ? this.updateDeployInfo(command, res, aliasOrConnection, null, projectPath)
+                    : this.updateDeployInfo(command, res, null, aliasOrConnection, projectPath);
+            })
+            .then( message =>{
+                logger.debug('Message :: ',message);
+                resolve(message);
+            })
+            .catch( err => {
+                logger.debug('Eerror :: ',error);
+                reject(err);
+            })
+        });
 
     },
 

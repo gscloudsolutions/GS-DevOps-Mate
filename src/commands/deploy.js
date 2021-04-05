@@ -110,7 +110,11 @@ program
             }
             /* Begins the deployment */
             logger.debug('Beginning MDAPI Deployment Process');
-            deploymentService.deploymentProcessor.mdapiDeploy(command, constants, artifact, con.token, con.type, ARTIFACTS_DIR_NAME, projectPath);
+            return deploymentService.deploymentProcessor.mdapiDeploy(command, constants, artifact, con.token, con.type, ARTIFACTS_DIR_NAME, projectPath);
+        })
+        .then(result => {
+            logger.info(result);
+            process.exit(0);
         })
         .catch(error => {
             logger.error(error);
