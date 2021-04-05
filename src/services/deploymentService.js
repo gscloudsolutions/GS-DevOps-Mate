@@ -323,7 +323,8 @@ const deploy = {
                     : this.failed( deploymentRes, uri, minBuildCoverage, minCodeCoveragePerCmp, validate, notificationTitle, reject );
             })
             .then( result => {
-                resolve(result);
+                logger.debug(result);
+                resolve(res); // returning the deployment response back
             })
             .catch( error => {
                 logger.error(error);

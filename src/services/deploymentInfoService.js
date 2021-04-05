@@ -74,7 +74,7 @@ const getDeploymentInfo = (moduleName, conn, buildId) => new Promise((resolve, r
 });
 
 const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias, deploymentRes) => new Promise((resolve, reject) => {
-
+    logger.debug(deploymentRes);
     let res = JSON.parse(deploymentRes);
     let result = res.result;
 
