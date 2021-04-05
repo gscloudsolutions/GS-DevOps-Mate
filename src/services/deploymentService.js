@@ -579,7 +579,7 @@ const deploymentProcessor = {
     Description : Run the deployment
     =================================================*/
     mdapiDeploy : function(command, constants, artifact, aliasOrConnection, type, DIRECTORY, projectPath){
-        new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             mdapiArtifactDeploy(`${command.artifactpath}/${DIRECTORY}/${artifact.name}`,
                 type=='alias' ? aliasOrConnection : aliasOrConnection.accessToken,
                 command.validate,
