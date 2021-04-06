@@ -49,7 +49,7 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
     logger.debug('jsonSubmission.status: ', jsonSubmission.status);
     logger.debug('jsonSubmission.code: ', jsonSubmission.code);
     if(jsonSubmission.status === 0) {
-        resolve(submission);
+        resolve(jsonSubmission);
     } else {
         let err = new Error();
         err.message = `Apex tests run failed: ${submission.stderr}`
