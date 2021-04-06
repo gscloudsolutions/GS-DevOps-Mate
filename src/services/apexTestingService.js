@@ -46,7 +46,7 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
         errorUtil.handleStderr(submission.stderr)
             .then((result) => {
                 logger.debug('runApexTests.js :: ', result);
-                reject(result);
+                resolve(result);
             })
             .catch((error) => {
                 logger.debug('runApexTests.js :: ', 'CATCH :: Unexpected error received!');
