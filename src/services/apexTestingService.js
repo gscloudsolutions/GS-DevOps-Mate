@@ -42,9 +42,9 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
         {
             silent: true,
         });
-    logger.debug('submission: ', submission);
+    logger.trace('submission: ', submission);
     let jsonSubmission = JSON.parse(submission);
-    logger.trace('jsonSubmission: ', jsonSubmission);
+    logger.debug('jsonSubmission: ', jsonSubmission);
     logger.debug('jsonSubmission.stderr: ', jsonSubmission.stderr);
     logger.debug('jsonSubmission.status: ', jsonSubmission.status);
     logger.debug('jsonSubmission.code: ', jsonSubmission.code);
