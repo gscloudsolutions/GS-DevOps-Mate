@@ -27,6 +27,7 @@ const FAILURE = 'Failure';
 const SUCCESS = 'Success';
 const NO_CODE_COVERAGE_INFO = 'No Code Coverage Info';
 const WAIT_TIME = process.env.WAIT_TIME || -1;
+const ENABLE_INDIVIDUAL_TESTS_COVERAGE  = process.env.ENABLE_INDIVIDUAL_TESTS_COVERAGE || true;
 
 const {
     ZIPPED_ARTIFACT,
@@ -393,8 +394,11 @@ const deploy = {
     Description :
     ==========================================================*/
     isSufficientCoverage :  function(codeCoverageResults, minBuildCoverage){
-        return codeCoverageResults === NO_CODE_COVERAGE_INFO
-        || (codeCoverageResults.overallBuildCodeCoverage > parseInt(minBuildCoverage) && codeCoverageResults.cmpsWithLessCodeCoverage.length <= 0);
+        let coverageResults = codeCoverageResults === NO_CODE_COVERAGE_INFO || codeCoverageResults.overallBuildCodeCoverage > parseInt(minBuildCoverage);
+        if(ENABLE_INDIVIDUAL_TESTS_COVERAGE === 'true' || ENABLE_INDIVIDUAL_TESTS_COVERAGE === true) {
+            coverageResults = coverageResults && codeCoverageResults.cmpsWithLessCodeCoverage.length <= 0
+        }
+        return coverageResults;
     }
 }
 
