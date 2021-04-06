@@ -10,7 +10,7 @@
 */
 const shellJS = require('shelljs');
 const fs = require('fs-extra');
-const errorUtil = require('../utils/errorUtil');
+// const errorUtil = require('../utils/errorUtil');
 const logger = require('../utils/logger');
 
 const testLevel = {
@@ -46,24 +46,34 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
     logger.trace('submission: ', submission);
     logger.debug('submission.stderr: ', submission.stderr);
     logger.debug('submission.status: ', submission.status);
-    if (submission.stderr !== '' || submission.stderr.includes('Warning')) {
-        errorUtil.handleStderr(submission.stderr)
-            .then((result) => {
-                logger.debug('runApexTests.js :: ', result);
-                resolve(result);
-            })
-            .catch((error) => {
-                logger.debug('runApexTests.js :: ', 'CATCH :: Unexpected error received!');
-                reject(error);
-            });
+    logger.debug('submission.code: ', submission.code);
+    if(submission.code === 0) {
+        submission.status = 0;
+        resolve(submission);
     } else {
-        submission = JSON.parse(submission.stdout);
-        logger.debug('runApexTests.js ::', submission.status);
-        if (submission.status === 0) {
-            resolve(submission);
-        }
-        reject(submission);
+        let err = new Error();
+        err.message = `Apex tests run failed: ${submission.stderr}`
+        err.status = submission.code
+        reject(err);
     }
+    // if (submission.stderr !== '' || submission.stderr.includes('Warning')) {
+    //     errorUtil.handleStderr(submission.stderr)
+    //         .then((result) => {
+    //             logger.debug('runApexTests.js :: ', result);
+    //             resolve(result);
+    //         })
+    //         .catch((error) => {
+    //             logger.debug('runApexTests.js :: ', 'CATCH :: Unexpected error received!');
+    //             reject(error);
+    //         });
+    // } else {
+    //     submission = JSON.parse(submission.stdout);
+    //     logger.debug('runApexTests.js ::', submission.status);
+    //     if (submission.status === 0) {
+    //         resolve(submission);
+    //     }
+    //     reject(submission);
+    // }
 });
 
 
