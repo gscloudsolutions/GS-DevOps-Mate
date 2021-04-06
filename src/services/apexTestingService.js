@@ -43,7 +43,10 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
             silent: true,
         });
     logger.debug('submission: ', submission);
-    if (submission.stderr !== '') {
+    logger.trace('submission: ', submission);
+    logger.debug('submission.stderr: ', submission.stderr);
+    logger.debug('submission.status: ', submission.status);
+    if (submission.stderr !== '' || submission.stderr.includes('Warning')) {
         errorUtil.handleStderr(submission.stderr)
             .then((result) => {
                 logger.debug('runApexTests.js :: ', result);
