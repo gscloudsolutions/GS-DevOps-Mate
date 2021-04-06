@@ -43,12 +43,12 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
             silent: true,
         });
     logger.debug('submission: ', submission);
-    logger.trace('submission: ', submission);
-    logger.debug('submission.stderr: ', submission.stderr);
-    logger.debug('submission.status: ', submission.status);
-    logger.debug('submission.code: ', submission.code);
-    if(submission.code === 0) {
-        submission.status = 0;
+    let jsonSubmission = JSON.parse(submission);
+    logger.trace('jsonSubmission: ', jsonSubmission);
+    logger.debug('jsonSubmission.stderr: ', jsonSubmission.stderr);
+    logger.debug('jsonSubmission.status: ', jsonSubmission.status);
+    logger.debug('jsonSubmission.code: ', jsonSubmission.code);
+    if(jsonSubmission.status === 0) {
         resolve(submission);
     } else {
         let err = new Error();
