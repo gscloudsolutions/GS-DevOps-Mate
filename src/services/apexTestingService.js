@@ -42,6 +42,7 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null) => new
         {
             silent: true,
         });
+    logger.debug('submission: ', submission);
     if (submission.stderr !== '') {
         errorUtil.handleStderr(submission.stderr)
             .then((result) => {
