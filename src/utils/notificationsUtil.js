@@ -413,4 +413,5 @@ module.exports = {
     generateSuccessNotificationForSlack,
     sendNotificationToSlack,
     generateNoDiffMessage,
+    createProviderSpecificMessage,
 };

@@ -17,6 +17,7 @@ const fs = require('fs-extra');
 
 const authenticate = require('../services/authenticationService');
 const apexTestingService = require('../services/apexTestingService');
+const notificationService = require('../services/apexTestingNotificationService');
 const logger = require('../utils/logger');
 
 program
@@ -33,6 +34,7 @@ program
     .option('-u --username <username>', 'Username for the target org')
     .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
     .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
+    .option('-u --uri <uri>', 'Slack notification Webhook URI.')
     .action((command) => {
         logger.debug('params:', command);
         logger.debug('targetusername:', command.targetusername);
@@ -69,6 +71,9 @@ program
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
+                    if(command.uri) {
+                        return notificationService.sendSuccessMessage(command.uri,  result.result.summary);
+                    }
                     process.exit(result.status);
                 })
                 .catch((error) => {
@@ -76,6 +81,9 @@ program
                     // write the results to an artifact
                     if (error.result && error.result.summary && error.result.summary.testRunId) {
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
+                    }
+                    if(command.uri) {
+                        notificationService.sendFailureMessage(command.uri,  error.result.summary);
                     }
                     process.exit(error.status);
                 });
@@ -89,6 +97,9 @@ program
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
+                    if(command.uri) {
+                        return notificationService.sendSuccessMessage(command.uri,  result.result.summary);
+                    }
                     process.exit(result.status);
                 })
                 .catch((error) => {
@@ -96,6 +107,9 @@ program
                     // write the results to an artifact
                     if (error.result && error.result.summary && error.result.summary.testRunId) {
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
+                    }
+                    if(command.uri) {
+                        notificationService.sendFailureMessage(command.uri,  error.result.summary);
                     }
                     process.exit(error.status);
                 });
