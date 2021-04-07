@@ -41,6 +41,7 @@ program
     .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
     .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
     .option('--slackWebhookUri <uri>', 'Slack notification Webhook URI.')
+    .option('--notificationTitle <title>', 'Custom Notification Title for Slack')
     .option('-w --wait <wait>', 'Wait time for the command.')
     .action((command) => {
         logger.debug('params:', command);
@@ -80,7 +81,7 @@ program
                 })
                 .then((result) => {
                     if(command.slackWebhookUri) {
-                        return notificationService.sendSuccessMessage(command.slackWebhookUri,  result.result.summary);
+                        return notificationService.sendSuccessMessage(command.slackWebhookUri,  result.result.summary, command.notificationTitle);
                     }
                     process.exit(result.status);
                 })
@@ -91,7 +92,7 @@ program
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
                     }
                     if(command.uri) {
-                        notificationService.sendFailureMessage(command.slackWebhookUri,  error.result.summary);
+                        notificationService.sendFailureMessage(command.slackWebhookUri,  error.result.summary, command.notificationTitle);
                     }
                     process.exit(1);
                 });

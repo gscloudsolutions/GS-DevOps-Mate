@@ -55,10 +55,10 @@ Org Wide Coverage: ${summary.orgWideCoverage}`
     return blocks;
 }
 
-const generateSuccessMessage = async (summary) => {
-    
+const generateSuccessMessage = async (summary, notifTitle) => {
+    const title = notifTitle || 'Apex Test Class Run Results : Success'
     let blocks = await generateCommonMessage( 
-        'Apex Test Class Run Results : Success',
+        title,
         'pass',
         summary
     );
@@ -70,10 +70,10 @@ const generateSuccessMessage = async (summary) => {
 }
 
 
-const generateFailureMessage = async (summary) => {
-
+const generateFailureMessage = async (summary, notifTitle) => {
+    const title = notifTitle || 'Apex Test Class Run Results : Failed'
     let blocks = await generateCommonMessage( 
-        'Apex Test Class Run Results : Failed',
+        title,
         'fail',
         summary
     );
@@ -84,13 +84,13 @@ const generateFailureMessage = async (summary) => {
     };
 }
 
-const sendFailureMessage = async (uri, summary) => {
-    const message = await generateFailureMessage(summary);
+const sendFailureMessage = async (uri, summary, notifTitle) => {
+    const message = await generateFailureMessage(summary, notifTitle);
     await notify.sendNotificationToSlack(uri, message);
 }
 
-const sendSuccessMessage = async (uri, summary) => {
-    const message = await generateSuccessMessage(summary);
+const sendSuccessMessage = async (uri, summary, notifTitle) => {
+    const message = await generateSuccessMessage(summary, notifTitle);
     await notify.sendNotificationToSlack(uri, message);
 }
 
