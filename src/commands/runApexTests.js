@@ -66,12 +66,12 @@ program
                     // set the url configuration, required in case of running sfdx commands with access token
                     shellJS.exec(`sfdx force:config:set instanceUrl=${connection.instanceURL} --global`);
                     return apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], connection.accessToken,
-                        command.directoryPath, command.testClasses);
+                        command.directoryPath, command.testClasses, waitTime);
                 })
                 .then((result) => {
                     logger.debug('runApexTests.js :: ', result.result.summary);
                     // write the results to an artifact
-                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber, waitTime);
+                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
@@ -92,12 +92,13 @@ program
                     process.exit(error.status);
                 });
         } else {
-            apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], command.targetusername,
-                command.directoryPath, command.testClasses)
+            apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel],       command.targetusername,
+                command.directoryPath, command.testClasses,
+                waitTime)
                 .then((result) => {
                     logger.debug('runApexTests.js :: ', result.result.summary);
                     // write the results to an artifact
-                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber, waitTime);
+                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
