@@ -19,6 +19,10 @@ const authenticate = require('../services/authenticationService');
 const apexTestingService = require('../services/apexTestingService');
 const notificationService = require('../services/apexTestingNotificationService');
 const logger = require('../utils/logger');
+const genericExceptionHandler = require('../utils/uncaughtExceptionHandler');
+
+// Initializing the generic exception listner
+genericExceptionHandler.init();
 
 const COMMAND_WAIT_TIME = process.env.COMMAND_WAIT_TIME || 20;
 
