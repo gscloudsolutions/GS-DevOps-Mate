@@ -1,4 +1,5 @@
 const notify = require('../utils/notificationsUtil');
+const logger = require('../utils/logger');
 const ciCDProviderMessaging = require('../utils/cICDProviderSpecificMessaging').ciCDSpecificMessaging;
 
 const ciCDProvider = process.env.CI_CD_PROVIDER;
