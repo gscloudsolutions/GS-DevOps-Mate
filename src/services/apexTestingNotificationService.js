@@ -40,7 +40,7 @@ const generateCommonMessage = async (title, emoji) => {
 
 const generateSuccessMessage = async (summary) => {
     
-    let blocks = await generateCommonMessage(buildInfo, 
+    let blocks = await generateCommonMessage( 
         'Apex Test Class Run Results : Success',
         'ladybug'
     );
@@ -62,7 +62,7 @@ const generateSuccessMessage = async (summary) => {
 
 const generateFailureMessage = async (summary) => {
 
-    let blocks = await generateCommonMessage(buildInfo, 
+    let blocks = await generateCommonMessage( 
         'Apex Test Class Run Results : Failed',
         'fail'
     );
@@ -82,12 +82,12 @@ const generateFailureMessage = async (summary) => {
 }
 
 const sendFailureMessage = async (uri, summary) => {
-    const message = await generateSuccessMessage(summary);
+    const message = await generateFailureMessage(summary);
     await notify.sendNotificationToSlack(uri, message);
 }
 
 const sendSuccessMessage = async (uri, summary) => {
-    const message = await generateFailureMessage(summary);
+    const message = await generateSuccessMessage(summary);
     await notify.sendNotificationToSlack(uri, message);
 }
 
