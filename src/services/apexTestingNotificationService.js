@@ -4,7 +4,7 @@ const ciCDProviderMessaging = require('../utils/cICDProviderSpecificMessaging').
 
 const ciCDProvider = process.env.CI_CD_PROVIDER;
 
-const generateCommonMessage = async (title, emoji) => {
+const generateCommonMessage = async (title, emoji, summary) => {
     const blocks = [];
 
     let buildMessage = '';
@@ -59,7 +59,8 @@ const generateSuccessMessage = async (summary) => {
     
     let blocks = await generateCommonMessage( 
         'Apex Test Class Run Results : Success',
-        'ladybug'
+        'ladybug',
+        summary
     );
 
     logger.debug('blocks: ', blocks);
@@ -73,7 +74,8 @@ const generateFailureMessage = async (summary) => {
 
     let blocks = await generateCommonMessage( 
         'Apex Test Class Run Results : Failed',
-        'fail'
+        'fail',
+        summary
     );
 
     logger.debug('blocks: ', blocks);
