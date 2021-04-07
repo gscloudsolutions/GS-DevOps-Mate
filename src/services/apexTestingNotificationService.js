@@ -18,7 +18,7 @@ const generateCommonMessage = async (title, emoji, summary) => {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `*:${emoji}: ${title}:* ${buildMessage}`,
+                text: `*:ladybug: ${title} :${emoji}::* ${buildMessage}`,
             },
             accessory: {
                 type: 'image',
@@ -31,7 +31,7 @@ const generateCommonMessage = async (title, emoji, summary) => {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `*:${emoji}: ${title}:*  ${buildMessage}`,
+                text: `*:ladybug: ${title} :${emoji}::*  ${buildMessage}`,
             },
         });
     }
@@ -41,14 +41,14 @@ const generateCommonMessage = async (title, emoji, summary) => {
         text: {
             type: 'mrkdwn',
             text: `Tests Ran: ${summary.testsRan}
-                   Passing: ${summary.passing}
-                   Failing: ${summary.failing}
-                   Skipped: ${summary.skipped}
-                   Pass Rate: ${summary.passRate}
-                   Fail Rate: ${summary.failRate}
-                   Test Total Time: ${summary.testTotalTime}
-                   Test Run Coverage: ${summary.testRunCoverage}
-                   Org Wide Coverage: ${summary.orgWideCoverage}`
+            Passing: ${summary.passing}
+            Failing: ${summary.failing}
+            Skipped: ${summary.skipped}
+            Pass Rate: ${summary.passRate}
+            Fail Rate: ${summary.failRate}
+            Test Total Time: ${summary.testTotalTime}
+            Test Run Coverage: ${summary.testRunCoverage}
+            Org Wide Coverage: ${summary.orgWideCoverage}`
         },
     });
 
@@ -59,7 +59,7 @@ const generateSuccessMessage = async (summary) => {
     
     let blocks = await generateCommonMessage( 
         'Apex Test Class Run Results : Success',
-        'ladybug',
+        'pass',
         summary
     );
 
