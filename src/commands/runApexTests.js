@@ -93,7 +93,7 @@ program
                     if(command.uri) {
                         notificationService.sendFailureMessage(command.slackWebhookUri,  error.result.summary);
                     }
-                    process.exit(1);
+                    // process.exit(1);
                 });
         } else {
             apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel],       command.targetusername,
@@ -120,7 +120,7 @@ program
                     if(command.uri) {
                         notificationService.sendFailureMessage(command.uri,  error.result.summary);
                     }
-                    process.exit(1);
+                    // process.exit(1);
                 });
         }
     });
