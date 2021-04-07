@@ -75,7 +75,7 @@ program
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
-                    if(command.uri) {
+                    if(command.slackWebhookUri) {
                         return notificationService.sendSuccessMessage(command.slackWebhookUri,  result.result.summary);
                     }
                     process.exit(result.status);
@@ -102,7 +102,7 @@ program
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
-                    if(command.uri) {
+                    if(command.slackWebhookUri) {
                         return notificationService.sendSuccessMessage(command.uri,  result.result.summary);
                     }
                     process.exit(result.status);
