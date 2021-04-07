@@ -41,14 +41,14 @@ const generateCommonMessage = async (title, emoji, summary) => {
         text: {
             type: 'mrkdwn',
             text: `Tests Ran: ${summary.testsRan}
-            Passing: ${summary.passing}
-            Failing: ${summary.failing}
-            Skipped: ${summary.skipped}
-            Pass Rate: ${summary.passRate}
-            Fail Rate: ${summary.failRate}
-            Test Total Time: ${summary.testTotalTime}
-            Test Run Coverage: ${summary.testRunCoverage}
-            Org Wide Coverage: ${summary.orgWideCoverage}`
+Passing: ${summary.passing}
+Failing: ${summary.failing}
+Skipped: ${summary.skipped}
+Pass Rate: ${summary.passRate}
+Fail Rate: ${summary.failRate}
+Test Total Time: ${summary.testTotalTime}
+Test Run Coverage: ${summary.testRunCoverage}
+Org Wide Coverage: ${summary.orgWideCoverage}`
         },
     });
 
