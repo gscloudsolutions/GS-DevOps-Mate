@@ -20,6 +20,8 @@ const apexTestingService = require('../services/apexTestingService');
 const notificationService = require('../services/apexTestingNotificationService');
 const logger = require('../utils/logger');
 
+const COMMAND_WAIT_TIME = process.env.COMMAND_WAIT_TIME || 20;
+
 program
     .description('Set of commands to run test classes on Salesforce.');
 program
@@ -35,6 +37,7 @@ program
     .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
     .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
     .option('-u --uri <uri>', 'Slack notification Webhook URI.')
+    .option('-w --wait <wait>', 'Wait time for the command.')
     .action((command) => {
         logger.debug('params:', command);
         logger.debug('targetusername:', command.targetusername);
@@ -48,6 +51,7 @@ program
             logger.error('Invalid test level defined!');
             process.exit(1);
         }
+        let waitTime = command.wait || COMMAND_WAIT_TIME;
         if (!command.targetusername) {
             if (!(command.username && command.password)) {
                 logger.error('No JWT alias provided, so username and password are required.');
@@ -67,7 +71,7 @@ program
                 .then((result) => {
                     logger.debug('runApexTests.js :: ', result.result.summary);
                     // write the results to an artifact
-                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
+                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber, waitTime);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
@@ -93,7 +97,7 @@ program
                 .then((result) => {
                     logger.debug('runApexTests.js :: ', result.result.summary);
                     // write the results to an artifact
-                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
+                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber, waitTime);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
                 .then((result) => {
