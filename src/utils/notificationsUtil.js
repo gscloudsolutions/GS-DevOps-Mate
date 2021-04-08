@@ -16,7 +16,7 @@ const createProviderSpecificMessage = (buildInfo) => {
     let buildMessage = '';
     const buildURL = buildInfo.BuildResultsURL ? buildInfo.BuildResultsURL : '';
     buildMessage += buildInfo.BuildName ? `\n Build Name: <${buildURL}|${buildInfo.BuildName}>` : '';
-    buildMessage += buildInfo.BuildReason || buildInfo.BuildAuthorName ? `\n ${buildInfo.BuildReason} Run by: ${buildInfo.BuildAuthorName}` : '';
+    buildMessage += buildInfo.BuildReason || buildInfo.BuildAuthorName ? `\n${buildInfo.BuildReason} Run by: ${buildInfo.BuildAuthorName}` : '';
     buildMessage += buildInfo.BuildSourceBranch ? `\n Source Branch: <${buildInfo.BuildSourceBranchURL}|${buildInfo.BuildSourceBranch}>` : '';
     buildMessage += buildInfo.ArtifactPath ? `\n Artifact can be found <${buildInfo.ArtifactPath}|here>` : '';
     return buildMessage;
