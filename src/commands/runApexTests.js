@@ -91,7 +91,7 @@ program
                     if (error.result && error.result.summary && error.result.summary.testRunId) {
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
                     }
-                    if(command.uri) {
+                    if(command.slackWebhookUri) {
                         notificationService.sendFailureMessage(command.slackWebhookUri, error.result.summary, command.notificationTitle);
                     }
                     process.exit(1);
@@ -118,7 +118,7 @@ program
                     if (error.result && error.result.summary && error.result.summary.testRunId) {
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
                     }
-                    if(command.uri) {
+                    if(command.slackWebhookUri) {
                         notificationService.sendFailureMessage(command.uri,  error.result.summary);
                     }
                     process.exit(1);
