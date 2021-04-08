@@ -92,12 +92,12 @@ program
                         apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
                     }
                     if(command.uri) {
-                        notificationService.sendFailureMessage(command.slackWebhookUri,  error.result.summary, command.notificationTitle);
+                        notificationService.sendFailureMessage(command.slackWebhookUri, error.result.summary, command.notificationTitle);
                     }
                     process.exit(1);
                 });
         } else {
-            apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel],       command.targetusername,
+            apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], command.targetusername,
                 command.directoryPath, command.testClasses,
                 waitTime)
                 .then((result) => {

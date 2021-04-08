@@ -52,8 +52,8 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null, wait) 
         resolve(jsonSubmission);
     } else {
         let err = new Error();
-        err.message = `Apex tests run failed: ${submission.stderr}`
-        err.status = submission.code
+        err.message = `Apex tests run failed`;
+        err.result = jsonSubmission.result;
         reject(err);
     }
     // if (submission.stderr !== '' || submission.stderr.includes('Warning')) {
