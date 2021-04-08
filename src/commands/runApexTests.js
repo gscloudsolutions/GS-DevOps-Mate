@@ -93,8 +93,10 @@ program
                     }
                     if(command.slackWebhookUri) {
                         notificationService.sendFailureMessage(command.slackWebhookUri, error.result.summary, command.notificationTitle);
+                    } else {
+                        process.exit(1);
                     }
-                    process.exit(1);
+                    
                 });
         } else {
             apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], command.targetusername,
