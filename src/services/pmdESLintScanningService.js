@@ -155,7 +155,7 @@ const transformAndSortBySeverity = (results) => {
     logger.debug(severitySummary.four);
     severitySummary.five = severityFiveResults.length;
     logger.debug(severitySummary.five);
-    severitySummary.total = fivetransformedResults.length;
+    severitySummary.total = transformedResults.length;
     logger.debug(severitySummary.total);
     
     return transformedResults;
