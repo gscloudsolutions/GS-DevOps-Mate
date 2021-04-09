@@ -396,7 +396,9 @@ const deploy = {
     isSufficientCoverage :  function(codeCoverageResults, minBuildCoverage){
         let coverageResults = codeCoverageResults === NO_CODE_COVERAGE_INFO || codeCoverageResults.overallBuildCodeCoverage > parseInt(minBuildCoverage);
         if(ENABLE_INDIVIDUAL_TESTS_COVERAGE === 'true' || ENABLE_INDIVIDUAL_TESTS_COVERAGE === true) {
-            coverageResults = coverageResults && codeCoverageResults.cmpsWithLessCodeCoverage.length <= 0
+            let length = codeCoverageResults?.cmpsWithLessCodeCoverage?.length;
+            logger.debug('length: ',length);
+            coverageResults = coverageResults && codeCoverageResults?.cmpsWithLessCodeCoverage?.length <= 0;
         }
         return coverageResults;
     }
