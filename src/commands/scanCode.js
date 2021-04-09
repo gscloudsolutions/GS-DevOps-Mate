@@ -18,7 +18,8 @@ const codeScanningService =  require('../services/pmdESLintScanningService')
 const {
     TARGET_TO_RUN_SCA,
     PMD_CONFIG_PATH,
-    ESLINT_CONFIG_PATH
+    ESLINT_CONFIG_PATH,
+    SWITCH_OFF_SCA
 } = process.env;
 
 program
