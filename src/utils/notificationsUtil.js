@@ -259,10 +259,9 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
                         },
                     );
                     // eslint-disable-next-line no-plusplus
-                    cmpsCounter++;
-                } else {
-                    break;
+                    
                 }
+                cmpsCounter++;
                 
             });
         }
