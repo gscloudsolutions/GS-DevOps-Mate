@@ -65,9 +65,9 @@ const generateFinalMessage = async (summary, title, messagePrepFn, startEmoji, e
     let finalBlocks = await messagePrepFn(blocks, summary);
 
     logger.debug('finalBlocks: ', finalBlocks);
-    return {
-        finalBlocks,
-    };
+    let slackMessage = {};
+    slackMessage.blocks = finalBlocks
+    return slackMessage;
 }
 
 const calculateOverallCodeCoverage = (outputJSON, minCoverage = 75) => {
