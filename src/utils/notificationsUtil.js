@@ -57,8 +57,6 @@ const generateCommonMessage = async (title, titleStartEmoji, titleEndEmoji) => {
 }
 
 const generateFinalMessage = async (summary, title, messagePrepFn, startEmoji, endEmoji) => {
-    const title = notifTitle || 'Apex Test Class Run Results : Success'
-    
     let blocks = await generateCommonMessage( 
         title,
         startEmoji,
