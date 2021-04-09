@@ -42,7 +42,7 @@ program
             const targetToRunSCA = command.target || TARGET_TO_RUN_SCA;
             const pmdConfigPath = command.pmdconfig || PMD_CONFIG_PATH;
             const eslintconfig = command.eslintconfig || ESLINT_CONFIG_PATH;
-            const IGNORE = command.ignore || SWITCH_OFF_SCA || true;
+            const IGNORE = command.ignore || SWITCH_OFF_SCA || false; // Default is should not ignore
             const SLACK_WEBHOOK_URI = command.slackWebhookUri || SLACK_NOTIFICATION_URI;
             const NOTIF_TITLE = command.notificationTitle || 'Static Code Analysis Run Results';
             if(IGNORE || IGNORE === 'true') {
