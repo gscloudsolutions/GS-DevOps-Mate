@@ -396,9 +396,12 @@ const deploy = {
     isSufficientCoverage :  function(codeCoverageResults, minBuildCoverage){
         let coverageResults = codeCoverageResults === NO_CODE_COVERAGE_INFO || codeCoverageResults.overallBuildCodeCoverage > parseInt(minBuildCoverage);
         if(ENABLE_INDIVIDUAL_TESTS_COVERAGE === 'true' || ENABLE_INDIVIDUAL_TESTS_COVERAGE === true) {
-            let length = codeCoverageResults?.cmpsWithLessCodeCoverage?.length;
-            logger.debug('length: ',length);
-            coverageResults = coverageResults && codeCoverageResults?.cmpsWithLessCodeCoverage?.length <= 0;
+            const length = codeCoverageResults?.cmpsWithLessCodeCoverage?.length;
+            logger.debug('codeCoverageResults.cmpsWithLessCodeCoverage.length: ',length);
+            if(length) {
+                coverageResults = coverageResults && length <= 0;
+            }
+            
         }
         return coverageResults;
     }
