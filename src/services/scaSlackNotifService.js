@@ -22,9 +22,8 @@ Total Violations: ${summary.total}`
 }
 
 const generateSuccessMessage = async (summary, notifTitle) => {
-    const title = notifTitle || 'Static Code Analysis Results:'
     return await notify.generateFinalMessage(summary, 
-        title, 
+        notifTitle, 
         prepareFinalMessage,
         'in-code-review',
         'ok'
@@ -32,9 +31,8 @@ const generateSuccessMessage = async (summary, notifTitle) => {
 }
 
 const generateFailureMessage = async (summary, notifTitle) => {
-    const title = notifTitle || 'Static Code Analysis Results:'
     return await notify.generateFinalMessage(summary, 
-        title, 
+        notifTitle, 
         prepareFinalMessage,
         'in-code-review',
         'fail'

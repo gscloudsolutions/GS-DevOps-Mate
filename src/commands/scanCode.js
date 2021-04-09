@@ -19,7 +19,8 @@ const {
     TARGET_TO_RUN_SCA,
     PMD_CONFIG_PATH,
     ESLINT_CONFIG_PATH,
-    SWITCH_OFF_SCA
+    SWITCH_OFF_SCA,
+    SLACK_NOTIFICATION_URI,
 } = process.env;
 
 program
