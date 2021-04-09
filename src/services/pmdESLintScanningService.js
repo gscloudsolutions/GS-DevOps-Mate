@@ -181,7 +181,7 @@ const scan = async(targetPathforScanning,
         let fullCommand = `${baseCommand}${pmdConfig}${eslintConfig}`;
         logger.debug(fullCommand);
         const scanningResultsJSON = shellJS.exec(fullCommand, {silent: true}).stdout;
-        logger.debug('scanningResultsJSON: ', scanningResultsJSON);
+        logger.trace('scanningResultsJSON: ', scanningResultsJSON);
         const scanningResults = JSON.parse(scanningResultsJSON);
         logger.trace('scanningResults: ', scanningResults);
         logger.trace(scanningResults.result);
