@@ -33,7 +33,8 @@ const calculateOverallCodeCoverage = (outputJSON, minCoverage = 75) => {
                 logger.debug('cmp.numLocationsNotCovered: ', cmp.numLocationsNotCovered);
                 totalNumLocations += parseInt(cmp.numLocations);
                 totalNumLocationsNotCovered += parseInt(cmp.numLocationsNotCovered);
-                const codeCoverage = (((parseInt(cmp.numLocations) - parseInt(cmp.numLocationsNotCovered)) / parseInt(cmp.numLocations)) * 100).toFixed(2);
+                const codeCoverage = parseInt((((parseInt(cmp.numLocations) - parseInt(cmp.numLocationsNotCovered)) / parseInt(cmp.numLocations)) * 100).toFixed(2));
+                logger.debug(`codeCoverage for ${cmp}`, codeCoverage);
                 if (codeCoverage < minCoverage) {
                     cmpsWithLessCodeCoverage.push({ name: cmp.name, type: cmp.type, coverage: codeCoverage });
                 }
@@ -244,20 +245,25 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
             );
             let cmpsCounter = 1;
             result.cmpsWithLessCodeCoverage.forEach((cmp) => {
-                blocks.push(
-                    {
-                        type: 'divider',
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `${cmpsCounter}. ${cmp.type}: *${cmp.name}*  Code Coverage: ${cmp.coverage}%`,
+                if(cmpsCounter <= 10) {
+                    blocks.push(
+                        {
+                            type: 'divider',
                         },
-                    },
-                );
-                // eslint-disable-next-line no-plusplus
-                cmpsCounter++;
+                        {
+                            type: 'section',
+                            text: {
+                                type: 'mrkdwn',
+                                text: `${cmpsCounter}. ${cmp.type}: *${cmp.name}*  Code Coverage: ${cmp.coverage}%`,
+                            },
+                        },
+                    );
+                    // eslint-disable-next-line no-plusplus
+                    cmpsCounter++;
+                } else {
+                    break;
+                }
+                
             });
         }
     }
