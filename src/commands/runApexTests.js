@@ -57,6 +57,7 @@ program
             process.exit(1);
         }
         let waitTime = command.wait || COMMAND_WAIT_TIME;
+        let testsRunResults;
         if (!command.targetusername) {
             if (!(command.username && command.password)) {
                 logger.error('No JWT alias provided, so username and password are required.');
@@ -75,28 +76,50 @@ program
                 })
                 .then((result) => {
                     logger.debug('runApexTests.js :: ', result.result.summary);
-                    // write the results to an artifact
-                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
-                .then((result) => {
-                    if(command.slackWebhookUri) {
-                        return notificationService.sendSuccessMessage(command.slackWebhookUri,  result.result.summary, command.notificationTitle);
-                    }
-                    process.exit(result.status);
-                })
+                // .then((result) => {
+                //     if(result.status === 0) {
+                //         if(command.slackWebhookUri) {
+                //             return notificationService.sendSuccessMessage(command.slackWebhookUri,  result.result.summary, command.notificationTitle);
+                //         }
+                //         // process.exit(result.status);
+                //     } else {
+                //         // write the results to an artifact
+                //         if (result && result.result.summary && result.result.summary.testRunId) {
+                //             apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
+                //         }
+                //         if(command.slackWebhookUri) {
+                //             return notificationService.sendFailureMessage(command.slackWebhookUri, result.result.summary, command.notificationTitle);
+                //         }else {
+                //             process.exit(1);
+                //         }
+                //     }
+                    
+                // })
+                .then(result => {
+                    testsRunResults = result;
+                    // write the results to an artifact
+                    return apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
+                    
+                }) 
                 .catch((error) => {
                     logger.error('runApexTests.js :: ', ' :: ', 'FAILED :: ', error);
                     // write the results to an artifact
-                    if (error.result && error.result.summary && error.result.summary.testRunId) {
-                        apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
-                    }
-                    if(command.slackWebhookUri) {
-                        notificationService.sendFailureMessage(command.slackWebhookUri, error.result.summary, command.notificationTitle);
-                    } else {
-                        process.exit(1);
-                    }
+                    // if (error.result && error.result.summary && error.result.summary.testRunId) {
+                    //     apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
+                    // }
+                    // if(command.slackWebhookUri) {
+                    //     notificationService.sendFailureMessage(command.slackWebhookUri, error.result.summary, command.notificationTitle);
+                    // } else {
+                    //     process.exit(1);
+                    // }
                     
+                })
+                .finally(result => {
+                    logger.trace('result: ', result);
+                    logger.trace('testsRunResults: ', testsRunResults);
+                    process.exit(0);
                 });
         } else {
             apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], command.targetusername,

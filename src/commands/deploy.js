@@ -98,7 +98,7 @@ program
         let artifact = deploymentService.artifactProcessor.checkPath(command)
                                            .setVersion(command, projectPath)
                                            .setName(MDAPI_PACKAGE_NAME)
-                                           .exists(command, ARTIFACTS_DIR_NAME);
+                                           .exists(command, ARTIFACTS_DIR_NAME, constants.uri);
 
 
         // Authenticate User and Run Deployment
@@ -156,7 +156,7 @@ program
         let artifact = deploymentService.artifactProcessor.checkPath(command)
                                            .setVersion(command, projectPath)
                                            .setName(MDAPI_PACKAGE_NAME)
-                                           .exists(command, ARTIFACTS_DIR_NAME);
+                                           //.exists(command, ARTIFACTS_DIR_NAME); No need to check for artifact's existence as it relies on validated deployment Id from the org
 
         // Authenticate User and Run Deployment
         authenticate.authenticateUser(command, constants)

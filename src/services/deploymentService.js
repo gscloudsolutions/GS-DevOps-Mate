@@ -561,7 +561,7 @@ const artifactProcessor = {
     /*============================================
     Description :  Check If Artifact Exists
     ==============================================*/
-    exists : function(command, DIRECTORY){
+    exists : function(command, DIRECTORY, uri){
         if (fs.existsSync(`${command.artifactpath}/${DIRECTORY}/${this.name}`)) { return this; }
         logger.debug(`The artifact ${command.artifactpath}/${DIRECTORY}/${this.name} does not exists`);
 
