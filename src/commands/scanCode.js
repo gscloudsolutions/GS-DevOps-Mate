@@ -28,24 +28,36 @@ program
 program
     .command('pmd-eslint')
     .description('Scans the code utilizing PMD and ESLint as static code analysis tools')
-    .option('-t target <target>', 'location of source code(required)')
-    .option('-e eslintconfig <eslintconfig>', 'location of eslintrc config to customize eslint engine')
-    .option('-p pmdconfig <pmdconfig>', 'location of PMD rule reference XML file to customize rule selection')
+    .option('-t --target <target>', 'location of source code(required)')
+    .option('-e --eslintconfig <eslintconfig>', 'location of eslintrc config to customize eslint engine')
+    .option('-p --pmdconfig <pmdconfig>', 'location of PMD rule reference XML file to customize rule selection')
+    .option('-i --ignore <ignore>', 'pass true and this command will not run')
+    .option('--slackWebhookUri <uri>', 'Slack notification Webhook URI')
+    .option('--notificationTitle <title>', 'Custom Notification Title for Slack')
     .action(async (command) => {
         try {
             logger.debug('command.target', command.target);
             const targetToRunSCA = command.target || TARGET_TO_RUN_SCA;
             const pmdConfigPath = command.pmdconfig || PMD_CONFIG_PATH;
             const eslintconfig = command.eslintconfig || ESLINT_CONFIG_PATH;
-            const isSCAFailed = await codeScanningService.scan(targetToRunSCA, 
-                pmdConfigPath,
-                eslintconfig);
-            logger.debug('isSCAFailed: ', isSCAFailed);
-            // Take action based on the result - Exit process, Send a Slack notification
-            if(isSCAFailed) {
-                process.exit(1);
+            const IGNORE = command.ignore || SWITCH_OFF_SCA || true;
+            const SLACK_WEBHOOK_URI = command.slackWebhookUri || SLACK_NOTIFICATION_URI;
+            const NOTIF_TITLE = command.notificationTitle || 'Static Code Analysis Run Results';
+            if(IGNORE || IGNORE === 'true') {
+                logger.info("SCA command is switched off, do nothing");
+            } else {
+                const isSCAFailed = await codeScanningService.scan(targetToRunSCA, 
+                    pmdConfigPath,
+                    eslintconfig,
+                    SLACK_WEBHOOK_URI,
+                    NOTIF_TITLE);
+                logger.debug('isSCAFailed: ', isSCAFailed);
+                // Take action based on the result - Exit process, Send a Slack notification
+                if(isSCAFailed) {
+                    process.exit(1);
+                }
+                process.exit(0);
             }
-            process.exit(0);
         }catch(error) {
             logger.error(error);
             process.exit(1); // Exits with error code which is 1

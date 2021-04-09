@@ -40,7 +40,7 @@ program
     .option('-u --username <username>', 'Username for the target org')
     .option('-s --password <secret>', 'Password for the target org add secret token as well if the target system is not open for the ip ranges')
     .option('-t --envType <type>', 'Either SANDBOX, PRODUCTION or SCRATCH')
-    .option('--slackWebhookUri <uri>', 'Slack notification Webhook URI.')
+    .option('--slackWebhookUri <uri>', 'Slack notification Webhook URI')
     .option('--notificationTitle <title>', 'Custom Notification Title for Slack')
     .option('-w --wait <wait>', 'Wait time for the command.')
     .action((command) => {

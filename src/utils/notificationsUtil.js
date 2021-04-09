@@ -22,6 +22,56 @@ const createProviderSpecificMessage = (buildInfo) => {
     return buildMessage;
 };
 
+const generateCommonMessage = async (title, titleStartEmoji, titleEndEmoji) => {
+    const blocks = [];
+
+    let buildMessage = '';
+    const buildInfo = await ciCDProviderMessaging[ciCDProvider].getBuildInfo();
+    if (buildInfo) {
+        buildMessage = createProviderSpecificMessage(buildInfo);
+    }
+
+    if (buildInfo.BuildAuthorAvatar) {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*:${titleStartEmoji}: ${title} :${titleEndEmoji}::* ${buildMessage}`,
+            },
+            accessory: {
+                type: 'image',
+                image_url: buildInfo.BuildAuthorAvatar,
+                alt_text: 'Build Triggered By',
+            },
+        });
+    } else {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*:${titleStartEmoji}: ${title} :${titleEndEmoji}::*  ${buildMessage}`,
+            },
+        });
+    }
+    return blocks;
+}
+
+const generateFinalMessage = async (summary, title, messagePrepFn, startEmoji, endEmoji) => {
+    const title = notifTitle || 'Apex Test Class Run Results : Success'
+    
+    let blocks = await generateCommonMessage( 
+        title,
+        startEmoji,
+        endEmoji
+    );
+    let finalBlocks = await messagePrepFn(blocks, summary);
+
+    logger.debug('finalBlocks: ', finalBlocks);
+    return {
+        finalBlocks,
+    };
+}
+
 const calculateOverallCodeCoverage = (outputJSON, minCoverage = 75) => {
     if (outputJSON.result.details.runTestResult && outputJSON.result.details.runTestResult.codeCoverage) {
         let totalNumLocations = 0;
@@ -413,6 +463,8 @@ const sendNotificationToSlack = (webhook, data) => {
 
 // Export methods
 module.exports = {
+    generateCommonMessage,
+    generateFinalMessage,
     calculateOverallCodeCoverage,
     generateFailureNotificationForSlack,
     generateSuccessNotificationForSlack,

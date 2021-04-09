@@ -17,6 +17,7 @@ const colors = require('colors');
 const type = require('type-detect');
 
 const logger = require('../utils/logger');
+const notificationService = require('./scaSlackNotificationService');
 
 const SEVERITY_VALUE_FOR_FAILURE =  process.env.SEVERITY_VALUE_FOR_FAILURE || 1
 
@@ -154,6 +155,8 @@ const transformAndSortBySeverity = (results) => {
     logger.debug(severitySummary.four);
     severitySummary.five = severityFiveResults.length;
     logger.debug(severitySummary.five);
+    severitySummary.total = fivetransformedResults.length;
+    logger.debug(severitySummary.total);
     
     return transformedResults;
 }
@@ -174,7 +177,9 @@ function transformedRow(fileName, line, column, ruleName, message, severity) {
 
 const scan = async(targetPathforScanning, 
     pmdConfigPath,
-    eslintConfigPath) => {
+    eslintConfigPath,
+    SLACK_WEBHOOK_URI,
+    NOTIF_TITLE) => {
         const baseCommand = `sfdx scanner:run --target ${targetPathforScanning}  --format json --json`;
         const pmdConfig = pmdConfigPath?` --pmdconfig ${pmdConfigPath}`:'';
         const eslintConfig = eslintConfigPath?` --eslintconfig ${eslintConfigPath}`:'';
@@ -189,11 +194,26 @@ const scan = async(targetPathforScanning,
         //logger.debug('scanningResults', scanningResults);
         const transformedResults = transformAndSortBySeverity(scanningResults.result);
         const beautifiedResults = beautifyForConsole(transformedResults, createSummary());
-        console.log(beautifiedResults);
-        // TODO: Generate HTML report
+        console.log(beautifiedResults); // To log beautified results
         logger.debug('After beautified results');
-        return isStaticCodeAnalysisFailed();
-        
+        const isSCAFailed = isStaticCodeAnalysisFailed();
+        // TODO: Generate HTML report
+        // Send Slack notification
+        if(SLACK_WEBHOOK_URI) {
+            if(isSCAFailed) {
+                await notificationService.sendFailureMessage(SLACK_WEBHOOK_URI,
+                    severitySummary,
+                    NOTIF_TITLE
+                );
+            } else {
+                await notificationService.sendSuccessMessage(SLACK_WEBHOOK_URI,
+                    severitySummary,
+                    NOTIF_TITLE
+                );
+            }
+
+        }
+        return isSCAFailed;
 }
 
 module.exports = {
