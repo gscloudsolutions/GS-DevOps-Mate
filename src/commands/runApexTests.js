@@ -78,25 +78,6 @@ program
                     logger.debug('runApexTests.js :: ', result.result.summary);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
-                // .then((result) => {
-                //     if(result.status === 0) {
-                //         if(command.slackWebhookUri) {
-                //             return notificationService.sendSuccessMessage(command.slackWebhookUri,  result.result.summary, command.notificationTitle);
-                //         }
-                //         // process.exit(result.status);
-                //     } else {
-                //         // write the results to an artifact
-                //         if (result && result.result.summary && result.result.summary.testRunId) {
-                //             apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
-                //         }
-                //         if(command.slackWebhookUri) {
-                //             return notificationService.sendFailureMessage(command.slackWebhookUri, result.result.summary, command.notificationTitle);
-                //         }else {
-                //             process.exit(1);
-                //         }
-                //     }
-                    
-                // })
                 .then(result => {
                     testsRunResults = result;
                     // write the results to an artifact
@@ -105,21 +86,23 @@ program
                 }) 
                 .catch((error) => {
                     logger.error('runApexTests.js :: ', ' :: ', 'FAILED :: ', error);
-                    // write the results to an artifact
-                    // if (error.result && error.result.summary && error.result.summary.testRunId) {
-                    //     apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
-                    // }
-                    // if(command.slackWebhookUri) {
-                    //     notificationService.sendFailureMessage(command.slackWebhookUri, error.result.summary, command.notificationTitle);
-                    // } else {
-                    //     process.exit(1);
-                    // }
-                    
                 })
                 .finally(result => {
                     logger.trace('result: ', result);
                     logger.trace('testsRunResults: ', testsRunResults);
-                    process.exit(0);
+                    if(testsRunResults.status === 0) {
+                        if(command.slackWebhookUri) {
+                            return notificationService.sendSuccessMessage(command.slackWebhookUri,  testsRunResults.result.summary, command.notificationTitle);
+                        } else {
+                            process.exit(0);
+                        }
+                    } else {
+                        if(command.slackWebhookUri) {
+                            return notificationService.sendFailureMessage(command.slackWebhookUri, testsRunResults.result.summary, command.notificationTitle);
+                        }else {
+                            process.exit(1);
+                        }
+                    }
                 });
         } else {
             apexTestingService.getTestSubmission(apexTestingService.testLevel[command.testLevel], command.targetusername,
@@ -127,26 +110,33 @@ program
                 waitTime)
                 .then((result) => {
                     logger.debug('runApexTests.js :: ', result.result.summary);
-                    // write the results to an artifact
-                    apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
                     return apexTestingService.checkTestCoverage(result, command.minimumPercentage || 75);
                 })
-                .then((result) => {
-                    if(command.slackWebhookUri) {
-                        return notificationService.sendSuccessMessage(command.uri,  result.result.summary);
-                    }
-                    process.exit(result.status);
-                })
-                .catch((error) => {
-                    logger.error('runApexTests.js :: ', ' :: ', 'FAILED ', error);
+                .then(result => {
+                    testsRunResults = result;
                     // write the results to an artifact
-                    if (error.result && error.result.summary && error.result.summary.testRunId) {
-                        apexTestingService.renameFiles(command.directoryPath, error.result.summary.testRunId, command.buildNumber);
+                    return apexTestingService.renameFiles(command.directoryPath, result.result.summary.testRunId, command.buildNumber);
+                    
+                }) 
+                .catch((error) => {
+                    logger.error('runApexTests.js :: ', ' :: ', 'FAILED :: ', error);
+                })
+                .finally(result => {
+                    logger.trace('result: ', result);
+                    logger.trace('testsRunResults: ', testsRunResults);
+                    if(testsRunResults.status === 0) {
+                        if(command.slackWebhookUri) {
+                            return notificationService.sendSuccessMessage(command.slackWebhookUri,  testsRunResults.result.summary, command.notificationTitle);
+                        } else {
+                            process.exit(0);
+                        }
+                    } else {
+                        if(command.slackWebhookUri) {
+                            return notificationService.sendFailureMessage(command.slackWebhookUri, testsRunResults.result.summary, command.notificationTitle);
+                        }else {
+                            process.exit(1);
+                        }
                     }
-                    if(command.slackWebhookUri) {
-                        notificationService.sendFailureMessage(command.uri,  error.result.summary);
-                    }
-                    process.exit(1);
                 });
         }
     });

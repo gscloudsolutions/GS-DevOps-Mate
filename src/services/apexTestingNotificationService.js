@@ -93,6 +93,7 @@ const sendFailureMessage = async (uri, summary, notifTitle) => {
 const sendSuccessMessage = async (uri, summary, notifTitle) => {
     const message = await generateSuccessMessage(summary, notifTitle);
     await notify.sendNotificationToSlack(uri, message);
+    process.exit(0);
 }
 
 module.exports = {

@@ -48,14 +48,14 @@ const getTestSubmission = (testType, alias, filePath, testClasses = null, wait) 
     logger.debug('jsonSubmission.stderr: ', jsonSubmission.stderr);
     logger.debug('jsonSubmission.status: ', jsonSubmission.status);
     logger.debug('jsonSubmission.code: ', jsonSubmission.code);
-    if(jsonSubmission.status === 0) {
-        resolve(jsonSubmission);
-    } else {
-        let err = new Error();
-        err.message = `Apex tests run failed`;
-        err.result = jsonSubmission.result;
-        reject(err);
-    }
+    //if(jsonSubmission.status === 0) {
+    resolve(jsonSubmission);
+    // } else {
+    //     let err = new Error();
+    //     err.message = `Apex tests run failed`;
+    //     err.result = jsonSubmission.result;
+    //     reject(err);
+    // }
     // if (submission.stderr !== '' || submission.stderr.includes('Warning')) {
     //     errorUtil.handleStderr(submission.stderr)
     //         .then((result) => {
@@ -92,7 +92,7 @@ const renameFiles = (targetDir, testRunId, buildNumber) => new Promise((resolve,
     try {
         fs.renameSync(`${targetDir}/test-result-${testRunId}.json`, `${targetDir}/test-result-${buildNumber}.json`);
         fs.renameSync(`${targetDir}/test-result-${testRunId}-junit.xml`, `${targetDir}/test-result-${buildNumber}-junit.xml`);
-        resolve();
+        resolve('File rename successful');
     } catch (exception) {
         reject(exception);
     }
@@ -118,13 +118,13 @@ const checkTestCoverage = (result, minimum = 75) => new Promise((resolve, reject
             logger.debug('runApexTests.js :: ', 'checkTestCoverage :: ', `test coverage for specified tests is <${minimum}`);
             // eslint-disable-next-line no-param-reassign
             result.status = 1;
-            reject(result);
+            resolve(result);
         }
         if (orgCoverage < minimum) {
             logger.debug('runApexTests.js :: ', 'checkTestCoverage :: ', `org wide coverage is <${minimum}`);
             // eslint-disable-next-line no-param-reassign
             result.status = 1;
-            reject(result);
+            resolve(result);
         }
         resolve(result);
     } catch (exception) {
