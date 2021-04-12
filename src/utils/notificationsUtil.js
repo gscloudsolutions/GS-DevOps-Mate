@@ -141,7 +141,10 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
         });
     }
 
-    if (outputJSON.result.details.componentFailures) {
+    if (outputJSON && 
+        outputJSON.result &&
+        outputJSON.result.details &&
+        outputJSON.result.details.componentFailures) {
         blocks.push(
             {
                 type: 'divider',
