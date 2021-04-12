@@ -20,6 +20,7 @@ const gitUtils = require('../utils/gitUtils');
 const logger = require('../utils/logger');
 const gitDiff = require('./gitDiff');
 const notify = require('../utils/notificationsUtil');
+require('../utils/uncaughtExceptionHandler').init();
 
 const MULTI_PACKAGE_NAME = process.env.MDAPI_PACKAGE_GROUP_NAME ? process.env.MDAPI_PACKAGE_GROUP_NAME : 'metadatapackage-group';
 const MDAPI_PACKAGE_NAME = process.env.MDAPI_PACKAGE_NAME ? process.env.MDAPI_PACKAGE_NAME : 'mdapiPackage';
@@ -374,12 +375,14 @@ function createCombinedArtifact(srcProjectPath,
                 shellJS.exec(`ls -a ${srcPath}/tempSFDXProject`);
                 const output = shellJS.exec('sfdx force:source:convert --json',
                     { silent: false });
+                logger.trace('output: ',output);    
                 const outputJSON = JSON.parse(output.stdout);
-                if (output.code === 1) {
-                    removeFolder(`${srcPath}/tempSFDXProject`);
-                    // reject if the convert source throws error
-                    reject(outputJSON);
-                }
+                logger.trace('outputJSON: ',outputJSON);
+                // if (output.status === 1) {
+                //     removeFolder(`${srcPath}/tempSFDXProject`);
+                //     // reject if the convert source throws error
+                //     reject(outputJSON);
+                // }
                 const mdapiPackageLocation = outputJSON.result.location;
                 logger.debug('mdapiPackageLocation: ', mdapiPackageLocation);
                 const mdapiPackageName = path.basename(mdapiPackageLocation);
