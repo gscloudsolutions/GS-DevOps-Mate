@@ -366,74 +366,67 @@ function createCombinedArtifact(srcProjectPath,
                     removeFolder('tempSFDXProject');
                     reject(err);
                 }
-                logger.debug(emoji.emojify(':arrow_forward: Artifact creation started.......'));
-                // Convert the source
-                shellJS.exec('pwd');
-                shellJS.exec(`ls -a ${srcPath}/tempSFDXProject`);
-                shellJS.cd(`${srcPath}/tempSFDXProject`);
-                shellJS.exec('pwd');
-                shellJS.exec(`ls -a ${srcPath}/tempSFDXProject`);
-                const output = shellJS.exec('sfdx force:source:convert --json',
-                    { silent: false });
-                logger.trace('output: ',output);    
-                const outputJSON = JSON.parse(output.stdout);
-                logger.trace('outputJSON: ',outputJSON);
-                // if (output.status === 1) {
-                //     removeFolder(`${srcPath}/tempSFDXProject`);
-                //     // reject if the convert source throws error
-                //     reject(outputJSON);
-                // }
-                const mdapiPackageLocation = outputJSON.result.location;
-                logger.debug('mdapiPackageLocation: ', mdapiPackageLocation);
-                const mdapiPackageName = path.basename(mdapiPackageLocation);
-                logger.debug('mdapiPackageLocation: ', mdapiPackageLocation);
+                try {
+                    logger.debug(emoji.emojify(':arrow_forward: Artifact creation started.......'));
+                    // Convert the source
+                    shellJS.exec('pwd');
+                    shellJS.exec(`ls -a ${srcPath}/tempSFDXProject`);
+                    shellJS.cd(`${srcPath}/tempSFDXProject`);
+                    shellJS.exec('pwd');
+                    shellJS.exec(`ls -a ${srcPath}/tempSFDXProject`);
+                    const output = shellJS.exec('sfdx force:source:convert --json',
+                        { silent: false });
+                    logger.trace('output: ',output);    
+                    const outputJSON = JSON.parse(output.stdout);
+                    logger.trace('outputJSON: ',outputJSON);
+                    // if (output.status === 1) {
+                    //     removeFolder(`${srcPath}/tempSFDXProject`);
+                    //     // reject if the convert source throws error
+                    //     reject(outputJSON);
+                    // }
+                    const mdapiPackageLocation = outputJSON.result.location;
+                    logger.debug('mdapiPackageLocation: ', mdapiPackageLocation);
+                    const mdapiPackageName = path.basename(mdapiPackageLocation);
+                    logger.debug('mdapiPackageLocation: ', mdapiPackageLocation);
 
-                shellJS.exec('pwd');
-                // Switch to the running project's directory
-                shellJS.cd(path.dirname(__dirname));
-                shellJS.exec('pwd');
+                    shellJS.exec('pwd');
+                    // Switch to the running project's directory
+                    shellJS.cd(path.dirname(__dirname));
+                    shellJS.exec('pwd');
 
-                // Copying the mdapi package (artifact) to the artifacts location based on environment
-                // specific config file
-                const currentVersion = packageVersion;
-                if (locationToStoreArtifacts) {
-                    logger.debug(`Copying the mdapi package (artifact) to the artifacts location ${locationToStoreArtifacts} and renaming it to have package version as well`);
-                    fs.copySync(`${mdapiPackageLocation}`,
-                        `${locationToStoreArtifacts}/${mdapiPackageName}`);
-                    fs.renameSync(`${locationToStoreArtifacts}/${mdapiPackageName}`,
-                        `${locationToStoreArtifacts}/${MDAPI_PACKAGE_NAME}-${currentVersion}`);
-                }
-
-                // Update the build info on successful artifact creation
-                logger.debug('currentModuleDirName: ', __dirname);
-                shellJS.pwd();
-
-                // if (!packageVersion) {
-                //     // Update the build info on successful artifact creation
-                //     const fileName = 'config/build.json';
-                //     const fileContent = fs.readFileSync(fileName);
-                //     const content = JSON.parse(fileContent);
-                //     content.lastsuccessfulcombinedbuild = currentCombinedBuild;
-
-                //     fs.writeFileSync(fileName, JSON.stringify(content, null, 2));
-                //     logger.debug(JSON.stringify(content, null, 2));
-                //     logger.debug(`writing to ${fileName}`);
-                // }
-
-                // Delete the temporary SFDX project
-                removeFolder(`${srcPath}/tempSFDXProject`);
-                logger.debug('Combined Artifact got created successfuly.....');
-
-                // Create zipped versions of artifacts
-                zipFolder.zipFolder(`${locationToStoreArtifacts}/${MDAPI_PACKAGE_NAME}-${currentVersion}`, `${locationToStoreArtifacts}/${MDAPI_PACKAGE_NAME}-${currentVersion}.zip`, (error) => {
-                    if (error) {
-                        logger.error('Something went wrong!', error);
-                        reject(error);
-                    } else {
-                        logger.debug('Combined Artifact Zip got created successfuly.....');
-                        resolve(`${MDAPI_PACKAGE_NAME}-${currentVersion}`);
+                    // Copying the mdapi package (artifact) to the artifacts location based on environment
+                    // specific config file
+                    const currentVersion = packageVersion;
+                    if (locationToStoreArtifacts) {
+                        logger.debug(`Copying the mdapi package (artifact) to the artifacts location ${locationToStoreArtifacts} and renaming it to have package version as well`);
+                        fs.copySync(`${mdapiPackageLocation}`,
+                            `${locationToStoreArtifacts}/${mdapiPackageName}`);
+                        fs.renameSync(`${locationToStoreArtifacts}/${mdapiPackageName}`,
+                            `${locationToStoreArtifacts}/${MDAPI_PACKAGE_NAME}-${currentVersion}`);
                     }
-                });
+
+                    // Update the build info on successful artifact creation
+                    logger.debug('currentModuleDirName: ', __dirname);
+                    shellJS.pwd();
+
+                    // Delete the temporary SFDX project
+                    removeFolder(`${srcPath}/tempSFDXProject`);
+                    logger.debug('Combined Artifact got created successfuly.....');
+
+                    // Create zipped versions of artifacts
+                    zipFolder.zipFolder(`${locationToStoreArtifacts}/${MDAPI_PACKAGE_NAME}-${currentVersion}`, `${locationToStoreArtifacts}/${MDAPI_PACKAGE_NAME}-${currentVersion}.zip`, (error) => {
+                        if (error) {
+                            logger.error('Something went wrong!', error);
+                            reject(error);
+                        } else {
+                            logger.debug('Combined Artifact Zip got created successfuly.....');
+                            resolve(`${MDAPI_PACKAGE_NAME}-${currentVersion}`);
+                        }
+                    });
+                } catch(exception) {
+                    removeFolder('tempSFDXProject');
+                    reject(exception);
+                }
             });
         } catch (exception) {
             removeFolder('tempSFDXProject');
