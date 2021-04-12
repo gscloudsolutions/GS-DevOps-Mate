@@ -105,9 +105,11 @@ const createPackage = (command, type, artifactCreationMethod) => {
                 logger.debug(`${type}: createMultipleArtifacts: `, message);
                 process.exit(0);
             })
-            .catch((error) => {
+            .catch(async (error) => {
                 logger.error(`${type}: `, error);
-                notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
+                if(SLACK_WEBHOOK_URL) {
+                    await notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
+                }
                 process.exit(1);
             });
     } else {
@@ -138,9 +140,11 @@ const createPackage = (command, type, artifactCreationMethod) => {
                 logger.debug(`${type}: `, message);
                 process.exit(0);
             })
-            .catch((error) => {
+            .catch(async (error) => {
                 logger.error(`${type}: `, error);
-                notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
+                if(SLACK_WEBHOOK_URL) {
+                    await notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
+                }
                 process.exit(1);
             });
     }
@@ -480,7 +484,7 @@ const createMDAPIPackageArtifact = (projectLocation, artifactsLocation, packageV
             })
             .catch((err) => {
                 logger.error(err);
-                process.exit(1);
+                reject(err);
             });
     },
 );
