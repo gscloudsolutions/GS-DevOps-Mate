@@ -214,6 +214,7 @@ function prepareAndCallMDDeployCommand(artifactPath, targetUserName,
 
 
 const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, testsToRun, uri, minCodeCoverage, notificationTitle) => {
+    // TODO: All this should be moved to async-await pattern
     try {
         if (!fs.existsSync(artifactPath) && !fs.existsSync(`${artifactPath}.zip`)) {
             logger.debug(`Either there is nothing to be deployed or something went wrong with the package creation process, please check the logs for package creation step.`);
@@ -234,16 +235,16 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
         if (ZIPPED_ARTIFACT === true || (ZIPPED_ARTIFACT && ZIPPED_ARTIFACT.toLowerCase() === 'true')) {
             logger.debug('Zipped artifact is required: ', ZIPPED_ARTIFACT);
             logger.debug('artifactPath', artifactPath);
-            extract(`${artifactPath}.zip`,
+            return new Promise((resolve, reject) => {
+                extract(`${artifactPath}.zip`,
                { dir: `${artifactPath}` },
                (err) => {
                    if (err) {
-                       logger.error(err);
-                       return new Promise((resolve, reject) => {
-                           reject(err);
-                       });
+                        logger.error(err);
+                        //return new Promise((resolve, reject) => {
+                        reject(err);
+                        //});
                    }
-                   // logger.debug('instanceUrl: ');
                    logger.debug('list everything in the artifact created');
                    shellJS.exec(`ls -a ${artifactPath}`);
                    return deploy.setTestsAndDeploy( artifactPath,
@@ -255,6 +256,8 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                                            uri,
                                            notificationTitle);
                });
+            });
+            
         } else {
            logger.debug('No zipped artifact required.....');
            return deploy.setTestsAndDeploy( artifactPath,
