@@ -229,6 +229,7 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
            && (fs.existsSync(`${artifactPath}/classes`) || testLevel === 'RunSpecifiedTests')) {
            runSpecifiedTests = true;
         }
+        logger.debug('Debugging after testLevel check');
    
         if (ZIPPED_ARTIFACT === true || (ZIPPED_ARTIFACT && ZIPPED_ARTIFACT.toLowerCase() === 'true')) {
             extract(`${artifactPath}.zip`,
@@ -263,7 +264,9 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                                    uri,
                                    notificationTitle);
         }
+        logger.debug('After zipped folder required condition check');
     } catch(err) {
+        logger.error(err);
         return new Promise((resolve, reject) => {
             logger.error(err);
             reject(err);
@@ -590,6 +593,13 @@ const deploymentProcessor = {
     =================================================*/
     mdapiDeploy : function(command, constants, artifact, aliasOrConnection, type, DIRECTORY, projectPath){
         return new Promise((resolve, reject) => {
+            logger.debug('command: ', command);
+            logger.debug('constants: ', constants);
+            logger.debug('artifact: ', artifact);
+            logger.debug('aliasOrConnection: ', type);
+            logger.debug('DIRECTORY: ', DIRECTORY);
+            logger.debug('DIRECTORY: ', projectPath);
+            logger.debug('Next we are going to call mdapiArtifactDeploy function');
             mdapiArtifactDeploy(`${command.artifactpath}/${DIRECTORY}/${artifact.name}`,
                 type=='alias' ? aliasOrConnection : aliasOrConnection.accessToken,
                 command.validate,
