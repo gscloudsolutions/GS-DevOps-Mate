@@ -254,9 +254,11 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                                             notificationTitle);
                 })
                 .then(result => {
+                    logger.debug(result);
                     resolve(result);
                 })
                 .catch(err => {
+                    logger.error(err);
                     reject(err);
                 });
                 // return new Promise((resolve, reject) => {
@@ -298,7 +300,7 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                 })
                 .catch(err => {
                     logger.error(err);
-                    resolve(err);
+                    reject(err);
                 });
             }
             logger.debug('After zipped folder required condition check');
