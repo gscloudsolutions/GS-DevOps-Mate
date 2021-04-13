@@ -19,7 +19,7 @@ const util = require('../utils/manifestUtil');
 const gitUtils = require('../utils/gitUtils');
 const logger = require('../utils/logger');
 const gitDiff = require('./gitDiff');
-const notify = require('../utils/notificationsUtil');
+const notify = require('./packageCreationNotifService');
 require('../utils/uncaughtExceptionHandler').init();
 
 const MULTI_PACKAGE_NAME = process.env.MDAPI_PACKAGE_GROUP_NAME ? process.env.MDAPI_PACKAGE_GROUP_NAME : 'metadatapackage-group';
@@ -109,7 +109,8 @@ const createPackage = (command, type, artifactCreationMethod) => {
             .catch(async (error) => {
                 logger.error(`${type}: `, error);
                 if(SLACK_WEBHOOK_URL) {
-                    await notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
+                    await notify.sendFailureMessage(SLACK_WEBHOOK_URL, error.message);
+                    process.exit(1);
                 }
                 process.exit(1);
             });
@@ -144,7 +145,8 @@ const createPackage = (command, type, artifactCreationMethod) => {
             .catch(async (error) => {
                 logger.error(`${type}: `, error);
                 if(SLACK_WEBHOOK_URL) {
-                    await notify.sendNotificationToSlack(SLACK_WEBHOOK_URL, error.message);
+                    await notify.sendFailureMessage(SLACK_WEBHOOK_URL, error.message);
+                    process.exit(1);
                 }
                 process.exit(1);
             });
@@ -366,7 +368,7 @@ function createCombinedArtifact(srcProjectPath,
                     removeFolder('tempSFDXProject');
                     reject(err);
                 }
-                try {
+                try { // Not adding a try catch here unleashes the zalgo 👹
                     logger.debug(emoji.emojify(':arrow_forward: Artifact creation started.......'));
                     // Convert the source
                     shellJS.exec('pwd');
