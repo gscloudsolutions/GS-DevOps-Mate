@@ -233,7 +233,7 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
     
             if ((testLevel !== 'NoTestRun' && testLevel !== 'RunLocalTests' && testLevel !== 'RunAllTestsInOrg')
             && (fs.existsSync(`${artifactPath}/classes`) || testLevel === 'RunSpecifiedTests')) {
-            runSpecifiedTests = true;
+                runSpecifiedTests = true;
             }
             logger.debug('Debugging after testLevel check');
             logger.debug('ZIPPED_ARTIFACT :', ZIPPED_ARTIFACT);
@@ -284,14 +284,22 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                 
             } else {
                 logger.debug('No zipped artifact required.....');
-                resolve(deploy.setTestsAndDeploy( artifactPath,
+                deploy.setTestsAndDeploy( artifactPath,
                                         targetUserName,
                                         validate,
                                         testLevel,
                                         testsToRun,
                                         runSpecifiedTests,
                                         uri,
-                                        notificationTitle));
+                                        notificationTitle)
+                .then(result => {
+                    logger.debug(result);
+                    resolve(result)
+                })
+                .catch(err => {
+                    logger.error(err);
+                    resolve(err);
+                });
             }
             logger.debug('After zipped folder required condition check');
         } catch(err) {
