@@ -230,8 +230,10 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
            runSpecifiedTests = true;
         }
         logger.debug('Debugging after testLevel check');
-   
+        logger.debug('ZIPPED_ARTIFACT :', ZIPPED_ARTIFACT);
         if (ZIPPED_ARTIFACT === true || (ZIPPED_ARTIFACT && ZIPPED_ARTIFACT.toLowerCase() === 'true')) {
+            logger.debug('Zipped artifact is required: ', ZIPPED_ARTIFACT);
+            logger.debug('artifactPath', artifactPath);
             extract(`${artifactPath}.zip`,
                { dir: `${artifactPath}` },
                (err) => {
