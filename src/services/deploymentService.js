@@ -513,13 +513,15 @@ const quickDeployUsingId = function(deploymentId, uri, targetUserName, notificat
             res = response;
             let deploymentRes = JSON.parse(response);
             logger.debug('THIS IS THE CHECK :::: ',deploymentRes);
-            return (deploymentRes.status === 0)
-              ? notification.success( uri, `${NO_CODE_COVERAGE_INFO}`, false, notificationTitle)
-              : notification.failed( res, uri, 100, `${NO_CODE_COVERAGE_INFO}`, false, notificationTitle);
-        })
-        .then( result => {
             resolve(res);
+            // No need to send notification here
+            // return (deploymentRes.status === 0)
+            //   ? notification.success( uri, `${NO_CODE_COVERAGE_INFO}`, false, notificationTitle)
+            //   : notification.failed( res, uri, 100, `${NO_CODE_COVERAGE_INFO}`, false, notificationTitle);
         })
+        // .then( result => {
+        //     resolve(res);
+        // })
         .catch( error => {
             logger.error(error);
             process.exit(1);
@@ -732,16 +734,22 @@ const deploymentProcessor = {
                                         constants.uri,
                                         type=='alias' ? aliasOrConnection : aliasOrConnection.accessToken,
                                         command.notificationTitle )
-        .then( response => {
+        .then( async response => {
             logger.debug('QUICK DEPLOYMENT RESPONSE CHECK :::', response );
-            return type=='alias'
-                ? this.updateDeployInfo(command, response, aliasOrConnection, null, projectPath)
-                : this.updateDeployInfo(command, response, null, aliasOrConnection, projectPath);
+            if(response.status === 0) {
+                // Update the deployment info and send the notification
+                type=='alias'
+                ? await this.updateDeployInfo(command, response, aliasOrConnection, null, projectPath)
+                : await this.updateDeployInfo(command, response, null, aliasOrConnection, projectPath);
+                return notification.success( uri, `${NO_CODE_COVERAGE_INFO}`, false, notificationTitle)
+            } else {
+                // Fallback to standard(non-quick) deployment
+                return this.mdapiDeploy(command, constants, artifact, aliasOrConnection, type, DIRECTORY, projectPath);
+            }
         })
+        .then(result => logger.debug(result))
         .catch(error => {
             logger.error(error);
-            // Try a non-quick deployment once
-            this.mdapiDeploy(command, constants, artifact, aliasOrConnection, type, DIRECTORY, projectPath);
         });
     }
 }
