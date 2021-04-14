@@ -750,6 +750,7 @@ const deploymentProcessor = {
         .then(result => logger.debug(result))
         .catch(error => {
             logger.error(error);
+            reject(error);
         });
     }
 }
