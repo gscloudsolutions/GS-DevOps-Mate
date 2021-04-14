@@ -137,6 +137,8 @@ program
     .option('-n --uri <uri>', 'Slack notification Webhook URI.')
     .option('--notificationTitle <title>', 'Custom Notification Title for Slack')
     .option('-b --bypass <title>', 'Bypass Deployment Info Update with the latest commit SHA')
+    .option('-l --testlevel <testLevel>', '(NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg) deployment testing level.')
+    .option('-k --testsLists <tests>', 'tests lists')
     .action((command) => {
         logger.debug(process.env);
         logger.info('command.artifactpath', command.artifactpath);
