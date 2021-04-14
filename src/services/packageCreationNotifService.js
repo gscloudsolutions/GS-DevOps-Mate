@@ -53,7 +53,7 @@ const sendFailureMessage = async (uri, summary, notifTitle = 'Package Creation S
     const message = await generatePackageCreationFailureMessage(notifTitle, summary);
     logger.debug('Slack message: ', message);
     logger.debug('uri: ', uri);
-    await notify.sendNotificationToSlack(uri, message);
+    return notify.sendNotificationToSlack(uri, message);
 }
 
 module.exports = {
