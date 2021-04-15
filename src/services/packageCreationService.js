@@ -241,7 +241,7 @@ function createMultipleArtifacts(srcProjectPath,
                         const output = shellJS.exec('sfdx force:source:convert --json',
                             { silent: false });
                         const outputJSON = JSON.parse(output.stdout);
-                        if (output.code === 1) {
+                        if (output.status === 1) {
                             // reject if the convert source throws error
                             removeFolder(`${srcPath}/tempSFDXProject`);
                             reject(outputJSON);
