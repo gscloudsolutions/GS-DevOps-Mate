@@ -381,7 +381,7 @@ function createCombinedArtifact(srcProjectPath,
                     logger.trace('output: ',output);    
                     const outputJSON = JSON.parse(output.stdout);
                     logger.trace('outputJSON: ',outputJSON);
-                    if (output.status === 1) {
+                    if (outputJSON.status === 1) {
                         throw new Error(outputJSON.message);
                     //     removeFolder(`${srcPath}/tempSFDXProject`);
                     //     // reject if the convert source throws error
