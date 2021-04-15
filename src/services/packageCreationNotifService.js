@@ -45,7 +45,9 @@ ${summary}`
         },
     });
 
-    return blocks;
+    return {
+        blocks
+    };
 }
 
 
