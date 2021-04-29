@@ -32,6 +32,7 @@ const SUCCESS = 'Success';
 const NO_CODE_COVERAGE_INFO = 'No Code Coverage Info';
 const WAIT_TIME = process.env.WAIT_TIME || -1;
 const ENABLE_INDIVIDUAL_TESTS_COVERAGE  = process.env.ENABLE_INDIVIDUAL_TESTS_COVERAGE || true;
+const DEPLOYMENT_RESPONSE_NO_ARTIFACT = 'Either there is nothing to be deployed or something went wrong with the package creation process,please check the logs for package creation step.';
 
 const {
     ZIPPED_ARTIFACT,
@@ -222,10 +223,10 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
         // TODO: All this should be moved to async-await pattern
         try {
             if (!fs.existsSync(artifactPath) && !fs.existsSync(`${artifactPath}.zip`)) {
-                logger.debug(`Either there is nothing to be deployed or something went wrong with the package creation process, please check the logs for package creation step.`);
+                logger.debug(DEPLOYMENT_RESPONSE_NO_ARTIFACT);
                 // process.exit(0);
                 //return new Promise((resolve, reject) => {
-                resolve('Either there is nothing to be deployed or something went wrong with the package creation process,please check the logs for package creation step.');
+                resolve(DEPLOYMENT_RESPONSE_NO_ARTIFACT);
                 //});   
             }
     
@@ -684,7 +685,10 @@ const deploymentProcessor = {
         logger.info('command.validate: ', command.validate);
         logger.trace('deploymentRes :: ', deploymentRes);
         let shortSHA;
-
+        if(deploymentRes === DEPLOYMENT_RESPONSE_NO_ARTIFACT) {
+            logger.info('Not Updating the deployment Info in the target org, as there is nothing deployed');
+            return new Promise((resolve, reject)=>{ resolve(deploymentRes); });
+        }
         if (command.successSHA && this.isNotBypass(command) && this.isNotValidation(command)){
             logger.info('Updating the deployment Info in the target org, as it is not a validation');
             // Find the git short hash revision
