@@ -195,16 +195,20 @@ function prepareAndCallMDDeployCommand(artifactPath, targetUserName,
                 logger.debug('status: ', status);
                 logger.debug('stdout: ', stdout);
                 resultsJSObject = JSON.parse(stdout);
-                if (status === 0) {
+                if(status !== 0) {
+                    if(resultsJSObject.name,include('PathDoesNotExist') ) {
+                        logger.info('Package/Artifact does not exists and release notes can not be generated');
+                    } else {
+                        logger.debug('deploy.js: prepareAndCallMDDeployCommand: Deployment/Validation failed: error: ', resultsJSObject);
+                        // Generate Error Notes as Artifacts
+                        console.log(resultsTransformer.transformAndBeautifyFailureResults(resultsJSObject));
+                        generateReleaseNotes(resultsJSObject, path.dirname(artifactPath), FAILURE);
+                        logger.error('deploy.js: prepareAndCallMDDeployCommand: uri: ', uri);
+                    }
+                }
+                else  {
                     // Generate Success Release Notes as Artifacts
                     generateReleaseNotes(resultsJSObject, path.dirname(artifactPath), SUCCESS);
-                }
-                else if (status !== 0) {
-                    // logger.error('deploy.js: prepareAndCallMDDeployCommand: Deployment/Validation failed: error: ', stdout);
-                    // Generate Error Notes as Artifacts
-                    console.log(resultsTransformer.transformAndBeautifyFailureResults(resultsJSObject));
-                    generateReleaseNotes(resultsJSObject, path.dirname(artifactPath), FAILURE);
-                    logger.error('deploy.js: prepareAndCallMDDeployCommand: uri: ', uri);
                 }
                 resolve(stdout);
             });
