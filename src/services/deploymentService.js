@@ -196,7 +196,7 @@ function prepareAndCallMDDeployCommand(artifactPath, targetUserName,
                 logger.debug('stdout: ', stdout);
                 resultsJSObject = JSON.parse(stdout);
                 if(status !== 0) {
-                    if(resultsJSObject.name,include('PathDoesNotExist') ) {
+                    if(resultsJSObject.name.includes('PathDoesNotExist') ) {
                         logger.info('Package/Artifact does not exists and release notes can not be generated');
                     } else {
                         logger.debug('deploy.js: prepareAndCallMDDeployCommand: Deployment/Validation failed: error: ', resultsJSObject);
