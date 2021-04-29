@@ -644,7 +644,10 @@ const deploymentProcessor = {
             logger.debug('DIRECTORY: ', DIRECTORY);
             logger.debug('DIRECTORY: ', projectPath);
             logger.debug('Next we are going to call mdapiArtifactDeploy function');
-            mdapiArtifactDeploy(`${command.artifactpath}/${DIRECTORY}/${artifact.name}`,
+            if(!artifact) {
+                resolve('No artifact to deploy');
+            } else {
+                mdapiArtifactDeploy(`${command.artifactpath}/${DIRECTORY}/${artifact.name}`,
                 type=='alias' ? aliasOrConnection : aliasOrConnection.accessToken,
                 command.validate,
                 command.testlevel,
@@ -652,19 +655,21 @@ const deploymentProcessor = {
                 constants.uri,
                 constants.minCodeCoverage,
                 command.notificationTitle)
-            .then( res =>{
-                return type=='alias'
-                    ? this.updateDeployInfo(command, res, aliasOrConnection, null, projectPath)
-                    : this.updateDeployInfo(command, res, null, aliasOrConnection, projectPath);
-            })
-            .then( message =>{
-                logger.debug('Message :: ',message);
-                resolve(message);
-            })
-            .catch( err => {
-                logger.debug('Error :: ',err);
-                reject(err);
-            })
+                .then( res =>{
+                    return type=='alias'
+                        ? this.updateDeployInfo(command, res, aliasOrConnection, null, projectPath)
+                        : this.updateDeployInfo(command, res, null, aliasOrConnection, projectPath);
+                })
+                .then( message =>{
+                    logger.debug('Message :: ',message);
+                    resolve(message);
+                })
+                .catch( err => {
+                    logger.debug('Error :: ',err);
+                    reject(err);
+                })
+            }
+            
         });
 
     },
