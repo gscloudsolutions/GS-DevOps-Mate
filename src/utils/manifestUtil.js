@@ -20,7 +20,7 @@ const logger = require('./logger');
 let metadataMappings = require('../../config/describeMetadata.json');
 
 const ignoreMetadataListFileName = process.env.MDT_IGNORE_FILE || 'ignoreMetadataList.json';
-const IGNORE_NAMESPACED_CMPS = process.env.MDT_IGNORE_FILE || false;
+const IGNORE_NAMESPACED_CMPS = process.env.IGNORE_NAMESPACED_CMPS || false;
 
 const getMetadataTypesToIgnore = backupDirPath => new Promise((resolve, reject) => {
     try {
