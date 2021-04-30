@@ -253,6 +253,10 @@ const listAllMetadata = async (conn, backupDirPath) => {
         logger.debug('Types: ', util.inspect(flattenedMetadataList, { maxArrayLength: null }));
         // To list folder based metadata
         const folderCmps = flattenedMetadataList.filter(component => (component && folderTypes.includes(component.type)));
+        const installedPackageCmps = flattenedMetadataList.filter(component => (component.namespacePrefix !== ''));
+        logger.info('Number of cmps/metadata from installed packages: ', installedPackageCmps.length);
+        const unmanagedCmps = flattenedMetadataList.filter(component => (component.namespacePrefix === ''));
+        logger.info('Number of unmanaged cmps/metadata: ', unmanagedCmps.length);
         const folderBasedMetadata = folderCmps.map((component) => {
             if (component.type === 'EmailFolder') {
                 return { type: 'EmailTemplate', folder: component.fullName };
@@ -284,6 +288,7 @@ const createTypesFromOrgCmps = (conn, backupDirPath) => new Promise(async (resol
         listAllMetadata(conn, backupDirPath)
             .then((componentsList) => {
                 let cmps;
+                logger.info('Total Number of Components/Metadata: ', componentsList.length);
                 componentsList.forEach((component) => {
                     if (component) {
                         let cmpType = component.type;
