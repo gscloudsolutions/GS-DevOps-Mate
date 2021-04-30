@@ -248,7 +248,7 @@ const listAllMetadata = async (conn, backupDirPath) => {
 
         logger.debug(`metadata list length: ${metadata.length}`);
         logger.debug(`metadata list: ${metadata}`);
-        const flattenedMetadataList = metadata.flat(1);
+        let flattenedMetadataList = metadata.flat(1);
         logger.debug(`metadata list length: ${flattenedMetadataList.length}`);
         logger.debug(`flattenedMetadataList: ${flattenedMetadataList}`);
         logger.debug('Types: ', util.inspect(flattenedMetadataList, { maxArrayLength: null }));
