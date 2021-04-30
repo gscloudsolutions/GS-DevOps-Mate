@@ -257,7 +257,7 @@ const listAllMetadata = async (conn, backupDirPath) => {
         logger.info('Number of cmps/metadata from installed packages: ', installedPackageCmps.length);
         const unmanagedCmps = flattenedMetadataList.filter(component => (component && component.namespacePrefix === ''));
         logger.info('Number of unmanaged cmps/metadata: ', unmanagedCmps.length);
-        if(IGNORE_NAMESPACED_CMPS === true) {
+        if(IGNORE_NAMESPACED_CMPS === true || IGNORE_NAMESPACED_CMPS === 'true') {
             flattenedMetadataList = unmanagedCmps;
         }
 
