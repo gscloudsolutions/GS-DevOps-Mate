@@ -20,6 +20,7 @@ const logger = require('./logger');
 let metadataMappings = require('../../config/describeMetadata.json');
 
 const ignoreMetadataListFileName = process.env.MDT_IGNORE_FILE || 'ignoreMetadataList.json';
+const IGNORE_NAMESPACED_CMPS = process.env.MDT_IGNORE_FILE || false;
 
 const getMetadataTypesToIgnore = backupDirPath => new Promise((resolve, reject) => {
     try {
@@ -252,11 +253,17 @@ const listAllMetadata = async (conn, backupDirPath) => {
         logger.debug(`flattenedMetadataList: ${flattenedMetadataList}`);
         logger.debug('Types: ', util.inspect(flattenedMetadataList, { maxArrayLength: null }));
         // To list folder based metadata
-        const folderCmps = flattenedMetadataList.filter(component => (component && folderTypes.includes(component.type)));
         const installedPackageCmps = flattenedMetadataList.filter(component => (component && component.namespacePrefix !== ''));
         logger.info('Number of cmps/metadata from installed packages: ', installedPackageCmps.length);
         const unmanagedCmps = flattenedMetadataList.filter(component => (component && component.namespacePrefix === ''));
         logger.info('Number of unmanaged cmps/metadata: ', unmanagedCmps.length);
+        if(IGNORE_NAMESPACED_CMPS === true) {
+            flattenedMetadataList = unmanagedCmps;
+        }
+
+        const folderCmps = flattenedMetadataList.filter(component => (component && folderTypes.includes(component.type)));
+        
+
         const folderBasedMetadata = folderCmps.map((component) => {
             if (component.type === 'EmailFolder') {
                 return { type: 'EmailTemplate', folder: component.fullName };
