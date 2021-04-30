@@ -253,9 +253,9 @@ const listAllMetadata = async (conn, backupDirPath) => {
         logger.debug(`flattenedMetadataList: ${flattenedMetadataList}`);
         logger.debug('Types: ', util.inspect(flattenedMetadataList, { maxArrayLength: null }));
         // To list folder based metadata
-        const installedPackageCmps = flattenedMetadataList.filter(component => (component && component.namespacePrefix !== ''));
+        const installedPackageCmps = flattenedMetadataList.filter(component => (component && (component.namespacePrefix !== '' || component.manageableState === 'installed')));
         logger.info('Number of cmps/metadata from installed packages: ', installedPackageCmps.length);
-        const unmanagedCmps = flattenedMetadataList.filter(component => (component && component.namespacePrefix === ''));
+        const unmanagedCmps = flattenedMetadataList.filter(component => (component && (component.namespacePrefix === '' || component.manageableState === 'unmanaged')));
         logger.info('Number of unmanaged cmps/metadata: ', unmanagedCmps.length);
         if(IGNORE_NAMESPACED_CMPS === true || IGNORE_NAMESPACED_CMPS === 'true') {
             flattenedMetadataList = unmanagedCmps;
