@@ -70,6 +70,30 @@ const ciCDSpecificMessaging = {
             };
         },
     },
+
+    GitHubActions: {
+        async getBuildInfo() {
+            logger.debug('process.env.GITHUB_WORKFLOW: ', process.env.GITHUB_WORKFLOW);
+            logger.debug('process.env.GITHUB_RUN_NUMBER: ', process.env.GITHUB_RUN_NUMBER);
+            logger.debug('process.env.GITHUB_ACTOR: ', process.env.GITHUB_ACTOR);
+            logger.debug('process.env.GITHUB_SERVER_URL: ', process.env.GITHUB_SERVER_URL);
+            logger.debug('process.env.GITHUB_REPOSITORY: ', process.env.GITHUB_REPOSITORY);
+            logger.debug('process.env.GITHUB_ACTION: ', process.env.GITHUB_ACTION);
+            logger.debug('process.env.GITHUB_BASE_REF: ', process.env.GITHUB_BASE_REF);
+            logger.debug('process.env.GITHUB_EVENT_NAME: ', process.env.GITHUB_EVENT_NAME);
+            const BASE_URL = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`
+            logger.debug('BASE_URL: ', BASE_URL);
+            return {
+                BuildName: `${process.env.GITHUB_WORKFLOW} - ${process.env.GITHUB_RUN_NUMBER}`,
+                BuildResultsURL: `${BASE_URL}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+                BuildAuthorName: process.env.GITHUB_ACTOR,
+                BuildSourceBranch: process.env.GITHUB_BASE_REF,
+                BuildSourceBranchURL: `${BASE_URL}/tree/${process.env.GITHUB_BASE_REF}`,
+                BuildReason: process.env.GITHUB_EVENT_NAME,
+                ArtifactPath: `${BASE_URL}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+            };
+        },
+    },
 };
 
 module.exports = {
