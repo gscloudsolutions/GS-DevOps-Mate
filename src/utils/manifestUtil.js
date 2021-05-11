@@ -154,11 +154,16 @@ const createExtensionToCmpNameMap = (getFiles, getFilesParam) => new Promise((re
             logger.debug('Length of the diff files array: ', files.length);
             files.forEach((element) => {
                 logger.debug('file path: ', element);
-                logger.debug('Base Name: ', path.basename(element));
+                let baseName = path.basename(element);
+                logger.debug('Base Name before: ', baseName);
+                baseName = baseName.replace('-meta.xml', '');
+                logger.debug('Base Name after: ', baseName);
                 const directoryName = path.basename(path.dirname(element));
                 logger.debug('Parent Folder Name: ', directoryName);
-                let extension = path.extname(element).replace('\.', '').replace('-meta.xml', '');
+                let extension = path.extname(baseName).replace('\.', '');
+                logger.debug('extension: ', extension);
                 let elementName = path.parse(element).name;
+                logger.debug('elementName: ', elementName);
                 if (!extensionToCmpName.has(extension)) {
                     extensionToCmpName.set(extension, []);
                 }
