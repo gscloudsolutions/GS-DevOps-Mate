@@ -122,16 +122,16 @@ const createExtensionToCmpNameMapBasedOnCmpNames = files => {
         return new Promise((resolve) => {
             resolve(files);
         })
-    })
+    }, files);
 }
 
 const createExtensionToCmpNameMapBasedOnProjectPath = projectPath => {
     return createExtensionToCmpNameMap((projectPath) => {
         return recursive(projectPath, ['*.xml', '.DS_Store']);
-    });
+    }, projectPath);
 }
 
-const createExtensionToCmpNameMap = (getFiles) => new Promise((resolve, reject) => {
+const createExtensionToCmpNameMap = (getFiles, getFilesParam) => new Promise((resolve, reject) => {
     const extensionToCmpName = new Map();
     let metadataTypesWithoutSuffix = [];
     let metadataTypesWithFolder = [];
@@ -148,7 +148,7 @@ const createExtensionToCmpNameMap = (getFiles) => new Promise((resolve, reject) 
         }) 
         .then((message) => {
             logger.debug(message);
-            return getFiles(projectPath);
+            return getFiles(getFilesParam);
         })
         .then((files) => {
             logger.debug('Length of the diff files array: ', files.length);
