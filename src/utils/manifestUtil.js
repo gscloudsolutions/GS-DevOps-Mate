@@ -162,7 +162,7 @@ const createExtensionToCmpNameMap = (getFiles, getFilesParam) => new Promise((re
                 logger.debug('Parent Folder Name: ', directoryName);
                 let extension = path.extname(baseName).replace('\.', '');
                 logger.debug('extension: ', extension);
-                let elementName = path.parse(element).name;
+                let elementName = path.parse(baseName).name;
                 logger.debug('elementName: ', elementName);
                 if (!extensionToCmpName.has(extension)) {
                     extensionToCmpName.set(extension, []);

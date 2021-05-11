@@ -328,11 +328,6 @@ const prepareDiffProject = (
                 if(CREATE_DESTRUCTIVE_XML === true || CREATE_DESTRUCTIVE_XML === 'true') {
                     logger.debug(`Creating and copying destructiveChanges.xml in ${artifactslocation}`);
                     return util.createDestructiveManifest(deletedItems, artifactslocation);
-                    // if (sfdxrepo === 'true' || sfdxrepo === true) {
-                    //     return util.createDestructiveManifest(deletedItems, artifactslocation);
-                    // } else {
-                    //     return util.createDestructiveManifest(deletedItems, artifactslocation); 
-                    // }
                 } else {
                     return new Promise(resolve => resolve(message));
                 }
