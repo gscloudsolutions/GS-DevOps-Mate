@@ -445,7 +445,8 @@ const savePackageManifest = (xml, projectPath) => {
 }
 
 const saveDestructivePackageManifest = (xml, projectPath) => {
-    logger.debug(`projectPath: ${projectPath}`);
+    logger.debug(`DestructivePackageManifest Path: ${projectPath}`);
+    fsExtra.ensureFileSync(`${projectPath}/destructiveChanges.xml`);
     fsExtra.writeFileSync(`${projectPath}/destructiveChanges.xml`, xml);
 }
 
@@ -470,26 +471,6 @@ const createPackageManifest = (projectPath, fullOrg, conn) => new Promise((resol
                     process.exit(0);
                 }
                 savePackageManifest(createManifestXML(types), projectPath);
-                // if (types.length === 0) {
-                //     logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
-                //     process.exit(0);
-                // }
-                // const manifestVersion = process.env.MANIFEST_VERSION || metadataMappings.latestAPIVersion;
-                // const packageXMLFeed = builder.create({
-                //     Package: {
-                //         '@xmlns': 'http://soap.sforce.com/2006/04/metadata',
-                //         types,
-                //         version: manifestVersion,
-                //     },
-                // }, { encoding: 'utf-8' });
-                // const packageXML = packageXMLFeed.end({ pretty: true });
-                // logger.debug(`Manifest File: ${packageXML}`);
-                // logger.debug(`projectPath: ${projectPath}`);
-                // if (fsExtra.existsSync(`${projectPath}/src`)) {
-                //     fsExtra.writeFileSync(`${projectPath}/src/package.xml`, packageXML);
-                // } else {
-                //     fsExtra.writeFileSync(`${projectPath}/package.xml`, packageXML);
-                // }
                 resolve('Package.xml created successfully.....');
             })
             .catch((error) => {
