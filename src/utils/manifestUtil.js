@@ -157,7 +157,7 @@ const createExtensionToCmpNameMap = (getFiles, getFilesParam) => new Promise((re
                 logger.debug('Base Name: ', path.basename(element));
                 const directoryName = path.basename(path.dirname(element));
                 logger.debug('Parent Folder Name: ', directoryName);
-                let extension = path.extname(element).replace('\.', '');
+                let extension = path.extname(element).replace('\.', '').replace('-meta.xml', '');
                 let elementName = path.parse(element).name;
                 if (!extensionToCmpName.has(extension)) {
                     extensionToCmpName.set(extension, []);
@@ -417,10 +417,6 @@ Promise((resolve, reject) => {
 });
 
 const createManifestXML = (types) => {
-    if (types.length === 0) {
-        logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
-        process.exit(0);
-    }
     const manifestVersion = process.env.MANIFEST_VERSION || metadataMappings.latestAPIVersion;
     const packageXMLFeed = builder.create({
         Package: {
@@ -464,6 +460,10 @@ const createPackageManifest = (projectPath, fullOrg, conn) => new Promise((resol
                 return createTypesFromFolderCmps(metadataInfoList, extensionToCmpName);
             })
             .then((types) => {
+                if (types.length === 0) {
+                    logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
+                    process.exit(0);
+                }
                 savePackageManifest(createManifestXML(types), projectPath);
                 // if (types.length === 0) {
                 //     logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
