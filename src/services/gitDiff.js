@@ -23,6 +23,8 @@ const deletedItems = [];
 let extensionNamesForCmpsWithMetaFiles = [];
 let metaXMLNamesForCmpsWithMetaFiles = [];
 
+const CREATE_DESTRUCTIVE_XML = process.env.CREATE_DESTRUCTIVE_XML || false;
+
 const getSFDXModulesList = (repoPath) => {
     // Reading the sfdx-project.json as the dependencies file
     const packageObj = fsExtra.readJSONSync(`${repoPath}/sfdx-project.json`);
@@ -320,6 +322,18 @@ const prepareDiffProject = (
                     return createProjectJSON(repoPath, diffProjectPath);
                 }
                 return util.createPackageManifest(artifactslocation);
+            })
+            .then((message) => {
+                logger.debug(`message after package creation: ${message}`);
+                if(CREATE_DESTRUCTIVE_XML === true || CREATE_DESTRUCTIVE_XML === 'true') {
+                    if (sfdxrepo === 'true' || sfdxrepo === true) {
+                        return util.createDestructiveManifest(deletedItems, repoPath); 
+                    } else {
+                        return util.createDestructiveManifest(deletedItems, artifactslocation); 
+                    }
+                } else {
+                    return new Promise(resolve => resolve(message));
+                }
             })
             .then((message) => {
                 logger.debug(`message from manifest creation method: ${message}`);

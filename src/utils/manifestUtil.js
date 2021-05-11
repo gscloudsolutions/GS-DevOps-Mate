@@ -117,7 +117,21 @@ const getMetadataTypesWithMetaFile = () => new Promise((resolve, reject) => {
     }
 });
 
-const createExtensionToCmpNameMap = projectPath => new Promise((resolve, reject) => {
+const createExtensionToCmpNameMapBasedOnCmpNames = files => {
+    return createExtensionToCmpNameMap((files) => {
+        return new Promise((resolve) => {
+            resolve(files);
+        })
+    })
+}
+
+const createExtensionToCmpNameMapBasedOnProjectPath = projectPath => {
+    return createExtensionToCmpNameMap((projectPath) => {
+        return recursive(projectPath, ['*.xml', '.DS_Store']);
+    });
+}
+
+const createExtensionToCmpNameMap = (getFiles) => new Promise((resolve, reject) => {
     const extensionToCmpName = new Map();
     let metadataTypesWithoutSuffix = [];
     let metadataTypesWithFolder = [];
@@ -130,8 +144,12 @@ const createExtensionToCmpNameMap = projectPath => new Promise((resolve, reject)
         .then((metadataListWithoutSuffix) => {
             logger.debug('metadataListWithoutSuffix: ', metadataListWithoutSuffix);
             metadataTypesWithoutSuffix = metadataListWithoutSuffix;
-            return recursive(projectPath, ['*.xml', '.DS_Store']);
-        }) // TODO: Get Metadata Types with Folder
+            return new Promise(resolve => resolve('Metadata lists with folder and without suffix got generated'));
+        }) 
+        .then((message) => {
+            logger.debug(message);
+            return getFiles(projectPath);
+        })
         .then((files) => {
             logger.debug('Length of the diff files array: ', files.length);
             files.forEach((element) => {
@@ -398,10 +416,42 @@ Promise((resolve, reject) => {
     }
 });
 
+const createManifestXML = (types) => {
+    if (types.length === 0) {
+        logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
+        process.exit(0);
+    }
+    const manifestVersion = process.env.MANIFEST_VERSION || metadataMappings.latestAPIVersion;
+    const packageXMLFeed = builder.create({
+        Package: {
+            '@xmlns': 'http://soap.sforce.com/2006/04/metadata',
+            types,
+            version: manifestVersion,
+        },
+    }, { encoding: 'utf-8' });
+    const packageXML = packageXMLFeed.end({ pretty: true });
+    logger.debug(`Manifest File: ${packageXML}`);
+    return packageXML;
+}
+
+const savePackageManifest = (xml, projectPath) => {
+    logger.debug(`projectPath: ${projectPath}`);
+    if (fsExtra.existsSync(`${projectPath}/src`)) {
+        fsExtra.writeFileSync(`${projectPath}/src/package.xml`, xml);
+    } else {
+        fsExtra.writeFileSync(`${projectPath}/package.xml`, xml);
+    }
+}
+
+const saveDestructivePackageManifest = (xml, projectPath) => {
+    logger.debug(`projectPath: ${projectPath}`);
+    fsExtra.writeFileSync(`${projectPath}/destructiveChanges.xml`, xml);
+}
+
 const createPackageManifest = (projectPath, fullOrg, conn) => new Promise((resolve, reject) => {
     let extensionToCmpName;
     if (projectPath) {
-        createExtensionToCmpNameMap(projectPath)
+        createExtensionToCmpNameMapBasedOnProjectPath(projectPath)
             .then((extToCmp) => {
                 extensionToCmpName = extToCmp;
                 logger.debug('extensionToCmpName: ', extensionToCmpName);
@@ -414,27 +464,50 @@ const createPackageManifest = (projectPath, fullOrg, conn) => new Promise((resol
                 return createTypesFromFolderCmps(metadataInfoList, extensionToCmpName);
             })
             .then((types) => {
-                if (types.length === 0) {
-                    logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
-                    process.exit(0);
-                }
-                const manifestVersion = process.env.MANIFEST_VERSION || metadataMappings.latestAPIVersion;
-                const packageXMLFeed = builder.create({
-                    Package: {
-                        '@xmlns': 'http://soap.sforce.com/2006/04/metadata',
-                        types,
-                        version: manifestVersion,
-                    },
-                }, { encoding: 'utf-8' });
-                const packageXML = packageXMLFeed.end({ pretty: true });
-                logger.debug(`Manifest File: ${packageXML}`);
-                logger.debug(`projectPath: ${projectPath}`);
-                if (fsExtra.existsSync(`${projectPath}/src`)) {
-                    fsExtra.writeFileSync(`${projectPath}/src/package.xml`, packageXML);
-                } else {
-                    fsExtra.writeFileSync(`${projectPath}/package.xml`, packageXML);
-                }
+                savePackageManifest(createManifestXML(types), projectPath);
+                // if (types.length === 0) {
+                //     logger.debug('No valid diff files found. Please try some other commit hashes or a full deployment');
+                //     process.exit(0);
+                // }
+                // const manifestVersion = process.env.MANIFEST_VERSION || metadataMappings.latestAPIVersion;
+                // const packageXMLFeed = builder.create({
+                //     Package: {
+                //         '@xmlns': 'http://soap.sforce.com/2006/04/metadata',
+                //         types,
+                //         version: manifestVersion,
+                //     },
+                // }, { encoding: 'utf-8' });
+                // const packageXML = packageXMLFeed.end({ pretty: true });
+                // logger.debug(`Manifest File: ${packageXML}`);
+                // logger.debug(`projectPath: ${projectPath}`);
+                // if (fsExtra.existsSync(`${projectPath}/src`)) {
+                //     fsExtra.writeFileSync(`${projectPath}/src/package.xml`, packageXML);
+                // } else {
+                //     fsExtra.writeFileSync(`${projectPath}/package.xml`, packageXML);
+                // }
                 resolve('Package.xml created successfully.....');
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    }
+});
+
+const createDestructiveManifest = (files, projectPath) => new Promise((resolve, reject) => {
+    let extensionToCmpName;
+    if (projectPath) {
+        createExtensionToCmpNameMapBasedOnCmpNames(files)
+            .then((extToCmp) => {
+                extensionToCmpName = extToCmp;
+                logger.debug('extensionToCmpName: ', extensionToCmpName);
+                return getMetaDataInfoList();
+            })
+            .then((metadataInfoList) => {
+                return createTypesFromFolderCmps(metadataInfoList, extensionToCmpName);
+            })
+            .then((types) => {
+                saveDestructivePackageManifest(createManifestXML(types), projectPath);
+                resolve('DestructiveChanges.xml created successfully.....');
             })
             .catch((error) => {
                 reject(error);
@@ -446,6 +519,7 @@ const createPackageManifest = (projectPath, fullOrg, conn) => new Promise((resol
 // Export methods
 module.exports = {
     createPackageManifest,
+    createDestructiveManifest,
     getMetaDataInfoList,
     listAllMetadata,
     fetchMetadataMappings,
