@@ -326,11 +326,13 @@ const prepareDiffProject = (
             .then((message) => {
                 logger.debug(`message after package creation: ${message}`);
                 if(CREATE_DESTRUCTIVE_XML === true || CREATE_DESTRUCTIVE_XML === 'true') {
-                    if (sfdxrepo === 'true' || sfdxrepo === true) {
-                        return util.createDestructiveManifest(deletedItems, repoPath); 
-                    } else {
-                        return util.createDestructiveManifest(deletedItems, artifactslocation); 
-                    }
+                    logger.debug(`Creating and copying destructiveChanges.xml in ${artifactslocation}`);
+                    return util.createDestructiveManifest(deletedItems, artifactslocation);
+                    // if (sfdxrepo === 'true' || sfdxrepo === true) {
+                    //     return util.createDestructiveManifest(deletedItems, artifactslocation);
+                    // } else {
+                    //     return util.createDestructiveManifest(deletedItems, artifactslocation); 
+                    // }
                 } else {
                     return new Promise(resolve => resolve(message));
                 }
