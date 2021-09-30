@@ -701,15 +701,15 @@ const deploymentProcessor = {
             // the module name logic will be refined to support modular deployment
             const gitTag = 'DEPLOYED';
             return alias
-            ? deploymentInfoService.updateDeploymentInfo('All', shortSHA, gitTag, null, alias, deploymentRes)
-            : deploymentInfoService.updateDeploymentInfo('All', shortSHA, gitTag, connection, null, deploymentRes);
+            ? deploymentInfoService.updateDeploymentInfo(command.module, shortSHA, gitTag, null, alias, deploymentRes)
+            : deploymentInfoService.updateDeploymentInfo(command.module, shortSHA, gitTag, connection, null, deploymentRes);
 
         } else if(!this.isNotValidation(command)){
             // Update the Deployment Info with the deployment id, without updating the SHA
             const gitTag = 'VALIDATED';
             return alias
-            ? deploymentInfoService.updateDeploymentInfo('All', shortSHA, gitTag, null, alias, deploymentRes)
-            : deploymentInfoService.updateDeploymentInfo('All', shortSHA, gitTag, connection, null, deploymentRes);
+            ? deploymentInfoService.updateDeploymentInfo(command.module, shortSHA, gitTag, null, alias, deploymentRes)
+            : deploymentInfoService.updateDeploymentInfo(command.module, shortSHA, gitTag, connection, null, deploymentRes);
         }
         else {
             logger.info('Not Updating the deployment Info in the target org, as it is a bypass');

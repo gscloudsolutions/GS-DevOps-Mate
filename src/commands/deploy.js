@@ -77,6 +77,7 @@ program
     .option('-k --testsLists <tests>', 'tests lists')
     .option('--notificationTitle <title>', 'Custom Notification Title for Slack')
     .option('-b --bypass <title>', 'Bypass Deployment Info Update with the latest commit SHA')
+    .option('-o --module <name>', 'modulename to set the commit SHA after the deployment process. Default: All', 'All')
     .action((command) => {
         logger.debug(process.env);
         logger.info('command.artifactpath', command.artifactpath);
@@ -139,6 +140,7 @@ program
     .option('-b --bypass <title>', 'Bypass Deployment Info Update with the latest commit SHA')
     .option('-l --testlevel <testLevel>', '(NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg) deployment testing level.')
     .option('-k --testsLists <tests>', 'tests lists')
+    .option('-o --module <name>', 'modulename to set the commit SHA after the deployment process. Default: All', 'All')
     .action((command) => {
         logger.debug(process.env);
         logger.info('command.artifactpath', command.artifactpath);
