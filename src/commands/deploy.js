@@ -69,7 +69,7 @@ program
     .option('-a --targetUserName <tuname>', 'The username/alias for the target Org that is already authenticated via JWT.')
     .option('-c --validate <validate>', 'Specifies either artifact validation or deployment. If validate, no changes will be deployed to target Org.')
     .option('-g --gitTag <tag>', 'The tag name (annotated not lightweight) to be applied after a successful deployment.')
-    .option('-l --testlevel <testLevel>', '(NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg) deployment testing level.')
+    .option('-l --testlevel <testLevel>', '(NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg|IntelligentTests) deployment testing level.')
     .option('-r --successSHA <sha>', 'The latest commit SHA to be stored in target Org Custom Setting.')
     .option('-m --minCodeCoverage <minCodeCoverage>', 'Minimum overall code coverage for the build')
     .option('-i --buildId <id>', 'Build-Id/Build-Number for uniquely identifying the deployment information.')

@@ -25,6 +25,7 @@ const notify = require('../utils/notificationsUtil');
 const logger = require('../utils/logger');
 const resultsTransformer = require('../services/deploymentResultsTransformer');
 const { resolve } = require('path');
+const {autoResolveRelevantTests} = require("./intelligentTests");
 
 
 const FAILURE = 'Failure';
@@ -233,11 +234,13 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                 resolve(DEPLOYMENT_RESPONSE_NO_ARTIFACT);
                 //});   
             }
-    
+
             let runSpecifiedTests = false;
-    
-            if ((testLevel !== 'NoTestRun' && testLevel !== 'RunLocalTests' && testLevel !== 'RunAllTestsInOrg')
-            && (fs.existsSync(`${artifactPath}/classes`) || testLevel === 'RunSpecifiedTests')) {
+
+
+
+            if (!['NoTestRun', 'RunLocalTests', 'RunAllTestsInOrg'].includes(testLevel)
+                && (fs.existsSync(`${artifactPath}/classes`) || ['RunSpecifiedTests', 'IntelligentTests'].includes(testLevel))) {
                 runSpecifiedTests = true;
             }
             logger.debug('Debugging after testLevel check');
@@ -288,7 +291,7 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
                 //                                notificationTitle);
                 //    });
                 // });
-                
+
             } else {
                 logger.debug('No zipped artifact required.....');
                 deploy.setTestsAndDeploy( artifactPath,
@@ -318,8 +321,8 @@ const mdapiArtifactDeploy = (artifactPath, targetUserName, validate, testLevel, 
             // });
         }
     })
-    
-    
+
+
  }
 
 
@@ -339,15 +342,21 @@ const deploy = {
 
         let res = null;
 
+        const testServices = [getTestsClasses(artifactPath)];
+        if (testLevel === 'IntelligentTests') {
+            testServices.push(autoResolveRelevantTests(artifactPath, 'mdapi'));
+        }
+
         return new Promise((resolve,reject)=>{
-            getTestsClasses(artifactPath)
-            .then( files => {
+            Promise.all(testServices)
+            .then( results => {
                 /* --- Henry: CRITICAL THIS IS A SINGLE COMMA WITH NO SPACE. SPACE WILL BREAK IT ---*/
                 let testsToRunList = [];
                 if(testsToRun) {
                     testsToRunList = testsToRun.split(',');
                 }
-                const  allTests = [...testsToRunList, ...files].join(',');
+                let allTests = [...testsToRunList, ...results.reduce((test, collector) => [...test, ...collector])];
+                allTests = [...new Set(allTests)].join(',');
 
                 logger.debug(allTests);
                 logger.debug('uri: ', uri);
@@ -389,13 +398,13 @@ const deploy = {
     Description : On Successful Deployment
     ==========================================================*/
     success  :  function(response, uri, validate, minBuildCoverage, minCodeCoveragePerCmp, notificationTitle) {
-        
-        
+
+
         // If URI not defined, return the sucessful deployment message so that
         // the calling code can exit
-        if (!uri) { 
+        if (!uri) {
             return new Promise((resolve, reject) => {
-                resolve ('Deployment Successful'); 
+                resolve ('Deployment Successful');
             });
         }
         else {
@@ -414,22 +423,22 @@ const deploy = {
                 ? notification.success( uri, codeCoverageResults, validate, notificationTitle)
                 : notification.failed(response, uri, minCodeCoveragePerCmp, codeCoverageResults, validate, notificationTitle);
         }
-        
-        
+
+
     },
 
     /*========================================================
     Description : On Failed Deployment
     ==========================================================*/
     failed : function(response, uri, validate, minBuildCoverage, minCodeCoveragePerCmp, notificationTitle){
-        
+
         // If URI not defined, return the sucessful deployment message so that
         // the calling code can exit
-        if (!uri) { 
+        if (!uri) {
             return new Promise((resolve, reject) => {
-                reject(new Error('Deployment Failed')); 
+                reject(new Error('Deployment Failed'));
             });
-            
+
         }
         else {
             logger.error('About to send failure notification');
@@ -451,7 +460,7 @@ const deploy = {
             if(length) {
                 coverageResults = coverageResults && length <= 0;
             }
-            
+
         }
         return coverageResults;
     }
@@ -674,7 +683,7 @@ const deploymentProcessor = {
                     reject(err);
                 })
             }
-            
+
         });
 
     },
