@@ -4,28 +4,21 @@ const shellJS = require('shelljs');
 const fs = require('fs');
 const logger = require('../utils/logger');
 
-const getTestsFromTargetOrg = (apexClassesList) => new Promise((resolve, reject) => {
-    const codeCoverageQuery = `SELECT ApexTestClass.Name
+const getTestsFromTargetOrg = (apexClassesList, targetUsername) => {
+    const codeCoverageQuery = `SELECT ApexTestClass.Name,
+                                      ApexClassorTrigger.Name
                                FROM ApexCodeCoverage
                                WHERE ApexClassorTrigger.Name IN (${apexClassesList.map(name => `'${name}'`).join(', ')})`;
-    const target = 'AVG_SFQA';
-    const queryRes = shellJS.exec(`sfdx force:data:soql:query -t -q "${codeCoverageQuery}" -u ${target} -r json`, {silent: true});
+
+    //TODO: we have enough info here to build an apex class -> apex test dependency map, would be neat in the future
+    const queryRes = shellJS.exec(`sfdx force:data:soql:query -t -q "${codeCoverageQuery}" -u ${targetUsername} -r json`, {silent: true});
 
     const apexClassNameWithId = JSON.parse(queryRes.stdout);
-    resolve(new Set(apexClassNameWithId.result.records.map(payload => payload.ApexTestClass.Name)));
-});
+    return [...new Set(apexClassNameWithId.result.records.map(payload => payload.ApexTestClass.Name))];
+};
 
-const getApexClassesFromArticlePath = (articlePath, projectType) => new Promise((resolve, reject) => {
-    let apexClassesQuery;
-    if (projectType === 'mdapi') {
-        apexClassesQuery = `${articlePath}/classes/`;
-    } else if (projectType === 'source') {
-        // TODO: need to account for non-default package
-        apexClassesQuery = `${articlePath}/force-app/main/default/classes/`;
-    } else {
-        logger.error(`Provided projectType: ${projectType} is not recognized`);
-        reject();
-    }
+const getApexClassesFromArticlePath = (articlePath) => {
+    const apexClassesQuery = `${articlePath}/classes/`;
     //clean extra /'s
     apexClassesQuery.replaceAll('//', '/');
 
@@ -39,7 +32,7 @@ const getApexClassesFromArticlePath = (articlePath, projectType) => new Promise(
     listOfClasses.forEach(filePath => {
         if (filePath.endsWith('.cls')) {
             const className = filePath.split('/').at(-1);
-            //TODO: this is first method to determine test classes. if this fails, move to grep contents
+            //TODO: this is first attempt to determine test classes. if this fails, move to grep contents
             if (className.toLowerCase().includes('test')) {
                 categorizedClasses.Tests.push(className.replace('.cls', ''));
             } else {
@@ -47,17 +40,14 @@ const getApexClassesFromArticlePath = (articlePath, projectType) => new Promise(
             }
         }
     });
-});
 
-const autoResolveRelevantTests = (articlePath, projectType) => new Promise((resolve, reject) => {
-    getApexClassesFromArticlePath(articlePath, projectType)
-        .then((result) => {
-            return getTestsFromTargetOrg(result.Classes);
-        })
-        .catch((error) => {
-            logger.error(`intelligentTests.js :: ${error}`);
-        })
-});
+    return categorizedClasses;
+};
+
+const autoResolveRelevantTests = (articlePath, targetUsername) => {
+    const apexClasses = getApexClassesFromArticlePath(articlePath);
+    return getTestsFromTargetOrg(apexClasses.Classes, targetUsername);
+};
 
 module.exports = {
     autoResolveRelevantTests
