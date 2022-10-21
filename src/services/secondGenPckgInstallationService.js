@@ -1,9 +1,8 @@
-const path = require('path');
 const fs = require('fs-extra');
 const shellJS = require('shelljs');
 const type = require('type-detect');
 
-const authenticate = require('../authenticate');
+const authenticate = require('./authenticationService');
 const logger = require('../utils/logger');
 
 const NO_INSTALLED_PACKAGE_FOUND = 'No installed package found';

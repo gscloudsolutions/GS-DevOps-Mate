@@ -13,7 +13,7 @@
 const shellJS = require('shelljs');
 const program = require('commander');
 
-const authenticate = require('../authenticate');
+const authService = require('../services/authenticationService');
 const logger = require('../utils/logger');
 const retrieveService = require('../services/retrievalService');
 
@@ -37,19 +37,35 @@ program
     .option('-n --packageName <package>', 'Name of the package that needs to be retrieved')
     .option('-m --moduleName <module>', 'Name of the module in which the package needs to be pulled in')
     .action((command) => {
-        const branchName = command.branchName || command.packageName.replace(/\s/g, '');// Removing any whitespaces
+        const branchName = command.branchName?.trim() || command.packageName.replace(/\s/g, '');// Removing any whitespaces
         logger.debug('branchName: ', branchName);
-        authenticate.loginWithCreds(command.username, command.password, command.type)
+        let filesToIgnoreList;
+        let packagePath = '';
+        const moduleName = command.moduleName?.trim() || 'force-app';
+        authService.loginWithCreds(command.username.trim(), command.password.trim(), command.type.trim())
             .then((connection) => {
                 // set the url configuration, required in case of running sfdx commands with access token
                 shellJS.exec(`sfdx force:config:set instanceUrl=${connection.instanceURL} --global`);
                 if (command.projectLocation) {
                     workingDirectory = command.projectLocation;
                 }
-                return retrieveService.retrievePackage(command.packageName, workingDirectory, connection.accessToken);
+                return retrieveService.retrievePackage(command.packageName, 
+                    workingDirectory, 
+                    connection.accessToken
+                );
             })
-            .then(packagePath => retrieveService.convertToSource(packagePath))
-            .then(convertedSrcPath => retrieveService.mergeToSource(convertedSrcPath, command.moduleName))
+            .then(packageLocation => {
+                packagePath = packageLocation;
+                return retrieveService.findFilesToBeIgnoredWhileCopying(packagePath, 
+                    workingDirectory
+                );
+            })
+            .then(filesToIgnore => {
+                filesToIgnoreList = filesToIgnore;
+                return retrieveService.convertToSourceInDefaultDestination(packagePath);
+            })
+            .then(convertedSrcPath => retrieveService.handleSpecialMerge(workingDirectory, convertedSrcPath, moduleName))
+            .then(convertedSrcPath => retrieveService.mergeToSource(convertedSrcPath, command.moduleName, filesToIgnoreList))
             .then(message => logger.debug(message))// TODO: handle special metadata like workflows and custom labels
             .catch((error) => {
                 console.error('retrieve.js: ', error);
@@ -72,7 +88,7 @@ program
         logger.debug('branchName: ', branchName);
         const srcDirectory = command.srcDirectory || 'src';
         let packagePath = '';
-        authenticate.loginWithCreds(command.username, command.password, command.type)
+        authService.loginWithCreds(command.username, command.password, command.type)
             .then((connection) => {
                 // set the url configuration, required in case of running sfdx commands with access token
                 shellJS.exec(`sfdx force:config:set instanceUrl=${connection.instanceURL} --global`);
@@ -102,7 +118,7 @@ program
     .action(async (command) => {
         try {
             logger.debug('retrieve.js :: ', 'running :: ');
-            const AUTH = await authenticate.loginWithCreds(
+            const AUTH = await authService.loginWithCreds(
                 command.username,
                 command.password,
                 command.type,
@@ -131,7 +147,7 @@ program
             const mdapiFolderPath = command.folderPath || 'src';
             const deleteBackupDir = command.deleteBackupDir || false;
             const backUpOnBranch = command.backUpOnBranch || true;
-            const CONNECTION = await authenticate.loginWithCreds(
+            const CONNECTION = await authService.loginWithCreds(
                 command.username,
                 command.password,
                 command.type,
@@ -158,7 +174,7 @@ program
             logger.debug('retrieve.js :: ', 'running :: ');
             const mdapiFolderPath = command.folderPath || '';
             const deleteBackupDir = command.deleteBackupDir || false;
-            const CONNECTION = await authenticate.loginWithCreds(
+            const CONNECTION = await authService.loginWithCreds(
                 command.username,
                 command.password,
                 command.type,

@@ -2,6 +2,7 @@ const axios = require('axios');
 const type = require('type-detect');
 
 const logger = require('./logger');
+const castArray = require('./utils').castArray;
 const ciCDProviderMessaging = require('./cICDProviderSpecificMessaging').ciCDSpecificMessaging;
 
 const NO_CODE_COVERAGE_INFO = 'No Code Coverage Info';
@@ -16,48 +17,104 @@ const createProviderSpecificMessage = (buildInfo) => {
     let buildMessage = '';
     const buildURL = buildInfo.BuildResultsURL ? buildInfo.BuildResultsURL : '';
     buildMessage += buildInfo.BuildName ? `\n Build Name: <${buildURL}|${buildInfo.BuildName}>` : '';
-    buildMessage += buildInfo.BuildReason || buildInfo.BuildAuthorName ? `\n ${buildInfo.BuildReason} Run by: ${buildInfo.BuildAuthorName}` : '';
+    buildMessage += buildInfo.BuildReason || buildInfo.BuildAuthorName ? `\n${buildInfo.BuildReason} Run by: ${buildInfo.BuildAuthorName}` : '';
     buildMessage += buildInfo.BuildSourceBranch ? `\n Source Branch: <${buildInfo.BuildSourceBranchURL}|${buildInfo.BuildSourceBranch}>` : '';
     buildMessage += buildInfo.ArtifactPath ? `\n Artifact can be found <${buildInfo.ArtifactPath}|here>` : '';
     return buildMessage;
 };
 
-const calculateOverallCodeCoverage = (outputJSON, minCoverage = 75) => {
-    if (outputJSON.result.details.runTestResult && outputJSON.result.details.runTestResult.codeCoverage) {
-        let totalNumLocations = 0;
-        let totalNumLocationsNotCovered = 0;
-        const cmpsWithLessCodeCoverage = [];
-        outputJSON.result.details.runTestResult.codeCoverage.forEach((cmp) => {
-            if (cmp.numLocations > 0) {
-                logger.debug('cmp.numLocations: ', cmp.numLocations);
-                logger.debug('cmp.numLocationsNotCovered: ', cmp.numLocationsNotCovered);
-                totalNumLocations += parseInt(cmp.numLocations);
-                totalNumLocationsNotCovered += parseInt(cmp.numLocationsNotCovered);
-                const codeCoverage = (((parseInt(cmp.numLocations) - parseInt(cmp.numLocationsNotCovered)) / parseInt(cmp.numLocations)) * 100).toFixed(2);
-                if (codeCoverage < minCoverage) {
-                    cmpsWithLessCodeCoverage.push({ name: cmp.name, type: cmp.type, coverage: codeCoverage });
-                }
-                logger.debug('totalNumLocations: ', totalNumLocations);
-                logger.debug('totalNumLocationsNotCovered: ', totalNumLocationsNotCovered);
-            }
+const generateCommonMessage = async (title, titleStartEmoji, titleEndEmoji) => {
+    const blocks = [];
+
+    let buildMessage = '';
+    const buildInfo = await ciCDProviderMessaging[ciCDProvider].getBuildInfo();
+    if (buildInfo) {
+        buildMessage = createProviderSpecificMessage(buildInfo);
+    }
+
+    if (buildInfo.BuildAuthorAvatar) {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*:${titleStartEmoji}: ${title} :${titleEndEmoji}::* ${buildMessage}`,
+            },
+            accessory: {
+                type: 'image',
+                image_url: buildInfo.BuildAuthorAvatar,
+                alt_text: 'Build Triggered By',
+            },
         });
+    } else {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*:${titleStartEmoji}: ${title} :${titleEndEmoji}::*  ${buildMessage}`,
+            },
+        });
+    }
+    return blocks;
+}
+
+const generateFinalMessage = async (summary, title, messagePrepFn, startEmoji, endEmoji) => {
+    let blocks = await generateCommonMessage( 
+        title,
+        startEmoji,
+        endEmoji
+    );
+    let finalBlocks = await messagePrepFn(blocks, summary);
+
+    logger.debug('finalBlocks: ', finalBlocks);
+    let slackMessage = {};
+    slackMessage.blocks = finalBlocks
+    return slackMessage;
+}
+
+const calculateOverallCodeCoverage = (outputJSON, minCoverage = 75) => {
+    const executionResults = outputJSON.result?.details || outputJSON.details || {};
+
+    let totalNumLocations = 0;
+    let totalNumLocationsNotCovered = 0;
+    const cmpsWithLessCodeCoverage = [];
+    
+    castArray(executionResults.runTestResult.codeCoverage).forEach((cmp) => {
+        if (cmp.numLocations <= 0) {
+            return;
+        }
+
+        logger.debug('cmp.numLocations: ', cmp.numLocations);
+        logger.debug('cmp.numLocationsNotCovered: ', cmp.numLocationsNotCovered);
+
+        totalNumLocations += parseInt(cmp.numLocations);
+        totalNumLocationsNotCovered += parseInt(cmp.numLocationsNotCovered);
+        const codeCoverage = parseInt((((parseInt(cmp.numLocations) - parseInt(cmp.numLocationsNotCovered)) / parseInt(cmp.numLocations)) * 100).toFixed(2));
+        logger.debug(`codeCoverage for ${cmp}`, codeCoverage);
+        
+        if (codeCoverage < minCoverage) {
+            cmpsWithLessCodeCoverage.push({ name: cmp.name, type: cmp.type, coverage: codeCoverage });
+        }
+
         logger.debug('totalNumLocations: ', totalNumLocations);
         logger.debug('totalNumLocationsNotCovered: ', totalNumLocationsNotCovered);
-        logger.debug('cmpsWithLessCodeCoverage: ', cmpsWithLessCodeCoverage);
-        if (totalNumLocations > 0) {
-            return {
-                overallBuildCodeCoverage: (((totalNumLocations - totalNumLocationsNotCovered) / totalNumLocations)
-                    * 100).toFixed(2),
-                cmpsWithLessCodeCoverage,
-            };
-        }
-        return NO_CODE_COVERAGE_INFO;
+    });
+    
+    logger.debug('totalNumLocations: ', totalNumLocations);
+    logger.debug('totalNumLocationsNotCovered: ', totalNumLocationsNotCovered);
+    logger.debug('cmpsWithLessCodeCoverage: ', cmpsWithLessCodeCoverage);
+    
+    if (totalNumLocations > 0) {
+        return {
+            overallBuildCodeCoverage: (((totalNumLocations - totalNumLocationsNotCovered) / totalNumLocations)
+                * 100).toFixed(2),
+            cmpsWithLessCodeCoverage,
+        };
     }
     return NO_CODE_COVERAGE_INFO;
 };
 
 const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, codeCoverageResult, isValidation, buildInfo, notificationTitle) => {
-    const outputJSON = JSON.parse(stdout);
+    const executionResults = stdout?.result?.details || stdout?.details || {};
 
     const validation = (isValidation === true || isValidation === 'true') ? 'validation' : '';
     const title = notificationTitle ? `${notificationTitle} Failed` : `Build ${validation} Failed`;
@@ -92,7 +149,8 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
         });
     }
 
-    if (outputJSON.result.details.componentFailures) {
+    if (executionResults.componentFailures) {
+        const componentFailures = castArray(executionResults.componentFailures);
         blocks.push(
             {
                 type: 'divider',
@@ -101,13 +159,13 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: `:red_circle: *Total failures*: ${outputJSON.result.details.componentFailures.length}`,
+                    text: `:red_circle: *Total failures*: ${componentFailures.length}`,
                 },
             },
         );
         let cmpsCounter = 1;
 
-        for (const cmp of outputJSON.result.details.componentFailures) {
+        for (const cmp of componentFailures) {
             if (cmpsCounter <= 10) {
                 blocks.push({
                     type: 'divider',
@@ -136,14 +194,14 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
     }
 
     // Parsing test result failures
-    if (outputJSON.result.details.runTestResult && outputJSON.result.details.runTestResult.failures) {
+    if (executionResults.runTestResult?.failures) {
         blocks.push(
             {
                 type: 'divider',
             },
         );
         let cmpsCounter = 1;
-        for (const cmp of outputJSON.result.details.runTestResult.failures) {
+        for (const cmp of castArray(executionResults.runTestResult.failures)) {
             if (cmpsCounter <= 10) {
                 blocks.push(
                     {
@@ -174,32 +232,14 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
     }
 
     // Parsing test result code coverage warnings
-    if (outputJSON.result.details.runTestResult && outputJSON.result.details.runTestResult.codeCoverageWarnings) {
+    if (executionResults.runTestResult?.codeCoverageWarnings) {
         blocks.push(
             {
                 type: 'divider',
             },
         );
         let cmpsCounter = 1;
-        if (type(outputJSON.result.details.runTestResult.codeCoverageWarnings) === 'Array') {
-            outputJSON.result.details.runTestResult.codeCoverageWarnings.forEach((cmp) => {
-                blocks.push(
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `${cmpsCounter}. _Component Name_: ${cmp.name} \n _Message_: ${cmp.message}`,
-                        },
-                    },
-                    {
-                        type: 'divider',
-                    },
-                );
-                // eslint-disable-next-line no-plusplus
-                cmpsCounter++;
-            });
-        } else {
-            const cmp = outputJSON.result.details.runTestResult.codeCoverageWarnings;
+        castArray(executionResults.runTestResult.codeCoverageWarnings).forEach((cmp) => {
             blocks.push(
                 {
                     type: 'section',
@@ -208,12 +248,16 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
                         text: `${cmpsCounter}. _Component Name_: ${cmp.name} \n _Message_: ${cmp.message}`,
                     },
                 },
+                {
+                    type: 'divider',
+                },
             );
-        }
+            // eslint-disable-next-line no-plusplus
+            cmpsCounter++;
+        });
     }
 
     // Parsing code coverage results in case of no failures
-    // const result = calculateOverallCodeCoverage(outputJSON);
     const result = codeCoverageResult;
     logger.debug('code coverage result: ', result);
     if (result !== NO_CODE_COVERAGE_INFO) {
@@ -244,20 +288,24 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
             );
             let cmpsCounter = 1;
             result.cmpsWithLessCodeCoverage.forEach((cmp) => {
-                blocks.push(
-                    {
-                        type: 'divider',
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `${cmpsCounter}. ${cmp.type}: *${cmp.name}*  Code Coverage: ${cmp.coverage}%`,
+                if(cmpsCounter <= 10) {
+                    blocks.push(
+                        {
+                            type: 'divider',
                         },
-                    },
-                );
-                // eslint-disable-next-line no-plusplus
+                        {
+                            type: 'section',
+                            text: {
+                                type: 'mrkdwn',
+                                text: `${cmpsCounter}. ${cmp.type}: *${cmp.name}*  Code Coverage: ${cmp.coverage}%`,
+                            },
+                        },
+                    );
+                    // eslint-disable-next-line no-plusplus
+                    
+                }
                 cmpsCounter++;
+                
             });
         }
     }
@@ -268,7 +316,19 @@ const createFailureNotificationForSlack = (stdout, minCodeCoveragePerCmp = 75, c
 };
 
 // eslint-disable-next-line max-len
-const generateFailureNotificationForSlack = async (stdout, minCodeCoveragePerCmp = 75, codeCoverageResult, isValidation, notificationTitle) => ciCDProviderMessaging[ciCDProvider].getBuildInfo().then(buildInfo => createFailureNotificationForSlack(stdout, minCodeCoveragePerCmp = 75, codeCoverageResult, isValidation, buildInfo, notificationTitle));
+const generateFailureNotificationForSlack = 
+async (stdout, minCodeCoveragePerCmp = 75, 
+    codeCoverageResult, 
+    isValidation, 
+    notificationTitle) => 
+    ciCDProviderMessaging[ciCDProvider].getBuildInfo()
+    .then(buildInfo => createFailureNotificationForSlack(stdout, 
+        minCodeCoveragePerCmp = 75, 
+        codeCoverageResult, 
+        isValidation, 
+        buildInfo, 
+        notificationTitle)
+    );
 
 const createSuccessNotificationForSlack = (codeCoverageResult, isValidation, buildInfo, notificationTitle) => {
     logger.debug(buildInfo);
@@ -279,7 +339,6 @@ const createSuccessNotificationForSlack = (codeCoverageResult, isValidation, bui
         buildMessage = createProviderSpecificMessage(buildInfo);
     }
     logger.debug('buildMessage: ', buildMessage);
-    // const outputJSON = JSON.parse(stdout);
     const blocks = [];
 
 
@@ -306,7 +365,6 @@ const createSuccessNotificationForSlack = (codeCoverageResult, isValidation, bui
         });
     }
 
-    // const result = calculateOverallCodeCoverage(outputJSON);
     const result = codeCoverageResult;
     logger.debug('code coverage result: ', result);
     if (result !== NO_CODE_COVERAGE_INFO) {
@@ -396,9 +454,12 @@ const sendNotificationToSlack = (webhook, data) => {
 
 // Export methods
 module.exports = {
+    generateCommonMessage,
+    generateFinalMessage,
     calculateOverallCodeCoverage,
     generateFailureNotificationForSlack,
     generateSuccessNotificationForSlack,
     sendNotificationToSlack,
     generateNoDiffMessage,
+    createProviderSpecificMessage,
 };

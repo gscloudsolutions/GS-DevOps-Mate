@@ -36,6 +36,17 @@
         <type>Text</type>
         <unique>false</unique>
     </fields>
+    <fields>
+        <fullName>Deployment_Id__c</fullName>
+        <description>The Id of the latest successful deployment.</description>
+        <externalId>false</externalId>
+        <label>Deployment Id</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
     <label>Deployment Info</label>
     <visibility>Public</visibility>
 </CustomObject>

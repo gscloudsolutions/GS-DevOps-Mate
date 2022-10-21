@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /* Copyright (c) 2019 Groundswell Cloud Solutions Inc. - All Rights Reserved
 *
 * THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF
@@ -13,8 +11,7 @@
 
 const jsforce = require('jsforce');
 const shellJS = require('shelljs');
-const program = require('commander');
-const logger = require('./utils/logger');
+const logger = require('../utils/logger');
 
 const SALESFORCE_ENV = {
     SANDBOX: 'https://test.salesforce.com',
@@ -99,71 +96,57 @@ const loginWithJWT = (clientId, severyKeyPath, sfUsername, orgAlias,
         } catch (exception) {
             reject(exception);
         }
-    },
+    }
 );
 
-program
-    .description('Set of commands to authenticate with Salesforce orgs');
 
-program
-    .command('loginWithCreds')
-    .description('Log in to a salesforce org with username and password. Returns the auth token and instance URL.')
-    .option('-u, --username <username>', 'The username of the authenticating Org.')
-    .option('-p, --password <password>', 'The password of the authenticating Org.')
-    .option('-t, --envType <SANDBOX|PRODUCTION|DEVELOPER|SCRATCH>', 'The environment type of the authenticating Org. Either SANDBOX, PRODUCTION, DEVELOPER or SCRATCH.')
-    .action((command) => {
-        let envType = 'PRODUCTION';
-        if (!command.username || !command.password) {
-            logger.error('--u username and -p --password are required params');
-            process.exit(1);
-        }
-        envType = command.envType.toString();
-        loginWithCreds(command.username, command.password, envType)
-            .then((response) => {
-                logger.trace(response);
-                process.exit(0);
+/**
+ * @description      : To authenticate user since we don't have alias available
+ * @param command    : Nodejs Program Command
+ * @param constants  : Constants setup from command argument
+ * @author           : Groundswell Cloud Solutions
+ */
+const authenticateUser = function(command, constants){
+    return new Promise((resolve,reject) => {
+        /* Run deployment using Alias  */
+        if(constants.alias){
+            resolve({token : constants.alias, type: 'alias'});
+        } else {
+            // If username and password not available stop process
+            if(!constants.username || !constants.password ) {
+                logger.error('Something went wrong, username/password incorrect or one of them is not passed');
+                process.exit(1);
+            }
+
+            // check if the environment type is available
+            if (!constants.envType) {
+                logger.error('-t --envType is required with username-password based deployment');
+                process.exit(1);
+            }
+
+            logger.debug('username/password is passed which means credentials based authentication to be used');
+
+            this.loginWithCreds(constants.username, constants.password, constants.envType)
+            .then(connection=>{
+                resolve({token : connection, type: 'connection'});
             })
-            .catch((err) => {
-                logger.error(err);
+            .catch(error => {
+                logger.error(`Error: ${error}`);
+                /* If this point is reached log error */
                 process.exit(1);
             });
+        }
+
     });
 
-program
-    .command('loginWithJWT')
-    .description('Log in to a salesforce org using JWT authentication method.')
-    .option('-i, --clientId <id>', 'The clientId from the Salesforce Connected App.')
-    .option('-u, --sfUsername <username>', 'The username of the authenticating Org.')
-    .option('-a, --orgAlias <alias>', 'Alias for the org to be authenticated.')
-    .option('-k, --serverKey <keyLocation>', 'Full path to the encrypted JWT Server Key.')
-    .option('-d, --decryptionKey <dKey>', 'Decryption Key to decrypt the encrypted server key.')
-    .option('-v, --decryptionIV <dIV>', 'Decryption Initialization Vector.')
-    .option('-t, --envType <SANDBOX|PRODUCTION|SCRATCH>', 'The environment type of the authenticating Org. Either SANDBOX, PRODUCTION or SCRATCH.')
-    .action((command) => {
-        let envType = 'PRODUCTION';
-        logger.info(command);
-        if (!command.clientId || !command.sfUsername
-      || !command.orgAlias || !command.serverKey) {
-            logger.error('-i --clientId, -u --sfUsername, -a --orgAlias and -k --serverKey are required params');
-            process.exit(1);
-        }
-        envType = command.envType.toString();
-        loginWithJWT(command.clientId, command.serverKey, command.sfUsername, command.orgAlias,
-            envType, command.decryptionKey, command.decryptionIV)
-            .then((response) => {
-                logger.info(response);
-                process.exit(0);
-            })
-            .catch((err) => {
-                logger.error(err);
-                process.exit(1);
-            });
-    });
+    
+}
+
+
 
 // Export methods
 module.exports = {
+    authenticateUser,
     loginWithCreds,
     loginWithJWT,
 };
-
-program.parse(process.argv);

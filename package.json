@@ -1,8 +1,8 @@
 {
   "name": "gs-devops-mate",
-  "version": "0.1.0",
+  "version": "0.2",
   "description": "CI/CD Services Agnostic tool to make conventional CI/CD for Salesforce super easy!",
-  "main": ".src/sourcedeploy.js",
+  "main": "./src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,15 +11,23 @@
     "url": "https://github.com/gscloudsolutions/GS-DevOps-Mate"
   },
   "keywords": [
-    "Groundswell Cloud Solutions Inc", "Salesforce", "deployments", "ci/cd", "automated-deployments",
-    "SFDX", "JavaScript", "NodeJS", "GS DevOps Mate"
+    "Groundswell Cloud Solutions Inc",
+    "Salesforce",
+    "deployments",
+    "ci/cd",
+    "automated-deployments",
+    "SFDX",
+    "JavaScript",
+    "NodeJS",
+    "GS DevOps Mate"
   ],
-  "author": "rohan@gscloudsolutions.com",
+  "author": "leo@gscloudsolutions.com",
   "license": "BSD3",
   "homepage": "https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/README.md",
   "dependencies": {
-    "@salesforce/core": "^1.3.2",
-    "axios": "^0.19.2",
+    "@salesforce/core": "^2.37.1",
+    "axios": "^0.27.2",
+    "colors": "^1.0.3",
     "commander": "^2.20.0",
     "dir-compare": "^1.7.2",
     "extract-zip": "^1.6.7",
@@ -39,16 +47,17 @@
   },
   "preferGlobal": true,
   "bin": {
-    "sfAuth": "src/authenticate.js",
-    "sfPackages": "src/createPackages.js",
-    "sfCompare": "src/sfDiff.js",
-    "sfTest": "src/runApexTests.js",
-    "sfDeploy": "src/deploy.js",
-    "sfDeploymentInfo": "src/deploymentInfoService.js",
-    "sfOrgs": "src/scratchOrgService.js",
+    "sfAuth": "src/commands/authenticate.js",
+    "sfPackages": "src/commands/createPackages.js",
+    "sfTest": "src/commands/runApexTests.js",
+    "sfDeploy": "src/commands/deploy.js",
+    "sfDeploymentInfo": "src/commands/deploymentInfo.js",
+    "sfOrgs": "src/commands/scratchOrg.js",
     "sfRetrieve": "src/commands/retrieve.js",
-    "sfMetaInfo": "src/manifestUtil.js",
-    "sfInstall": "src/commands/packageInstallation.js"
+    "sfMetaInfo": "src/commands/metaInfo.js",
+    "sfInstall": "src/commands/packageInstallation.js",
+    "sfScan": "src/commands/scanCode.js",
+    "sfCompare": "src/services/sfDiffService.js"
   },
   "devDependencies": {
     "eslint-config-airbnb": "^17.1.0"

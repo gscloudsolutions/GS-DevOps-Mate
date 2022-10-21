@@ -1,4 +1,4 @@
-#/* Copyright (c) 2019 Groundswell Cloud Solutions Inc. - All Rights Reserved
+#/* Copyright (c) 2019-2022 Groundswell Cloud Solutions Inc. - All Rights Reserved
 #*
 #* THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF
 #* ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -12,12 +12,19 @@
 # Specify a base image. Went with Node LTS for stability.
 # Went with ALPINE image for reduced image size, improving image construction speed.
 FROM node:lts-alpine
+
+# Updates the npm package
+RUN npm install npm --location=global
+
 # Install necessary tools.
 RUN apk add --update --no-cache git openssh ca-certificates openssl curl
+
+RUN apk --no-cache add openjdk11 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 RUN apk add --no-cache --virtual .pipeline-deps readline linux-pam \
   && apk add bash sudo shadow \
   && apk del .pipeline-deps
 
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm
 
 # Specifying a Working directory
 # RUN mkdir /tmp/gs_alm
@@ -41,7 +48,17 @@ RUN npm install
 # Install a specific version of SFDX, instead of installing the latest version as
 # we wanted to make sure that all the commands in the tool are well tested and then
 # only specify the latest tested sfdx version here.
-RUN npm install sfdx-cli@7.71.0 --global
+RUN npm install --location=global sfdx-cli@7.173.0
+# ------Install other global dependencies-----
+# For LWC testing, Apex Documentation and Static Code Analysis
+RUN npm install --location=global \
+      @salesforce/sfdx-lwc-jest \
+      @cparra/apexdocs \
+      @babel/eslint-parser \
+      @babel/core \
+      @lwc/eslint-plugin-lwc
+      
+RUN sfdx plugins:install @salesforce/sfdx-scanner
 
 COPY ./ ./
 

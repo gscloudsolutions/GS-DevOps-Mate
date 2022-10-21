@@ -12,7 +12,7 @@
 const shellJS = require('shelljs');
 const type = require('type-detect');
 
-const authenticate = require('../authenticate');
+const authenticate = require('./authenticationService');
 const logger = require('../utils/logger');
 const ciCDProviderMessaging = require('../utils/cICDProviderSpecificMessaging').ciCDSpecificMessaging;
 
@@ -23,7 +23,7 @@ const createPackageVersionCommand = (command) => {
     try {
         let versionCommand = 'SFDX_JSON_TO_STDOUT=true sfdx force:package:version:create -w 20 --json';
         logger.debug('type of command.codecoverage', type(command.codecoverage));
-        const codeCoverage = parseInt(command.codecoverage); // This step to fail if code coverage is not a valid String that can be converted into a Integer
+        parseInt(command.codecoverage); // This step is to generate the exception if code coverage is not a valid String that can be converted into a Integer
         if (type(command.codecoverage) === 'string') {
             versionCommand += ' --codecoverage';
         }

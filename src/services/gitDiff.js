@@ -13,8 +13,8 @@ const shellJS = require('shelljs');
 const fsExtra = require('fs-extra');
 const path = require('path');
 
-const util = require('./manifestUtil');
-const logger = require('./utils/logger');
+const util = require('../utils/manifestUtil');
+const logger = require('../utils/logger');
 
 const modifiedItems = [];
 const renamedItems = [];
@@ -22,6 +22,8 @@ const newItems = [];
 const deletedItems = [];
 let extensionNamesForCmpsWithMetaFiles = [];
 let metaXMLNamesForCmpsWithMetaFiles = [];
+
+const CREATE_DESTRUCTIVE_XML = process.env.CREATE_DESTRUCTIVE_XML || false;
 
 const getSFDXModulesList = (repoPath) => {
     // Reading the sfdx-project.json as the dependencies file
@@ -78,6 +80,7 @@ const generateGitDiffList = (output) => {
  * @param {*} repoPath
  * @param {*} nextCommit
  * @param {*} previousCommit
+ * @param {*} sfdxrepo
  */
 const prepareDiffItemsList = (repoPath, nextCommit, previousCommit, sfdxrepo) => new Promise(
     (resolve, reject) => {
@@ -204,6 +207,7 @@ const copyDiffContent = (repoPath, diffProjectPath) => new Promise((resolve, rej
           || element.includes('.trigger-meta.xml')
           || element.includes('.page-meta.xml')
           || element.includes('.component-meta.xml')
+          || element.includes('.email-meta.xml') //TODO: Support this dynamically like line 192
             ) {
                 const filePath = element.replace('-meta.xml', '');
                 fsExtra.copySync(`${repoPath}/${filePath}`, `${diffProjectPath}/${filePath}`);
@@ -259,8 +263,12 @@ const copyDiffContent = (repoPath, diffProjectPath) => new Promise((resolve, rej
                     }
                 }
             }
-            logger.debug(`Copying from ${repoPath}/${element} to ${diffProjectPath}/${element}`);
-            fsExtra.copySync(`${repoPath}/${element}`, `${diffProjectPath}/${element}`);
+            if (fsExtra.existsSync(`${repoPath}/${element}`)) {
+                logger.debug(`Copying from ${repoPath}/${element} to ${diffProjectPath}/${element}`);
+                fsExtra.copySync(`${repoPath}/${element}`, `${diffProjectPath}/${element}`);
+            } else {
+                logger.debug(`Ignoring file (renamed or deleted?) ${repoPath}/${element}`);
+            }
         });
         resolve('Diff Content Copied Successfully.....');
     } catch (exception) {
@@ -274,6 +282,8 @@ const copyDiffContent = (repoPath, diffProjectPath) => new Promise((resolve, rej
  * @param {*} diffProjectPath
  * @param {*} nextCommit
  * @param {*} previousCommit
+ * @param {*} sfdxrepo
+ * @param {*} artifactslocation
  */
 const prepareDiffProject = (
     repoPath,
@@ -316,6 +326,15 @@ const prepareDiffProject = (
                     return createProjectJSON(repoPath, diffProjectPath);
                 }
                 return util.createPackageManifest(artifactslocation);
+            })
+            .then((message) => {
+                logger.debug(`message after package creation: ${message}`);
+                if(CREATE_DESTRUCTIVE_XML === true || CREATE_DESTRUCTIVE_XML === 'true') {
+                    logger.debug(`Creating and copying destructiveChanges.xml in ${artifactslocation}`);
+                    return util.createDestructiveManifest(deletedItems, artifactslocation);
+                } else {
+                    return new Promise(resolve => resolve(message));
+                }
             })
             .then((message) => {
                 logger.debug(`message from manifest creation method: ${message}`);
