@@ -1,4 +1,4 @@
-#/* Copyright (c) 2019-2022 Groundswell Cloud Solutions Inc. - All Rights Reserved
+#/* Copyright (c) 2019-2023 Groundswell Cloud Solutions Inc. - All Rights Reserved
 #*
 #* THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF
 #* ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -48,16 +48,16 @@ RUN npm install
 # Install a specific version of SFDX, instead of installing the latest version as
 # we wanted to make sure that all the commands in the tool are well tested and then
 # only specify the latest tested sfdx version here.
-RUN npm install --location=global sfdx-cli@7.173.0
+RUN npm install --location=global sfdx-cli@7.196.7
 # ------Install other global dependencies-----
 # For LWC testing, Apex Documentation and Static Code Analysis
 RUN npm install --location=global \
-      @salesforce/sfdx-lwc-jest \
-      @cparra/apexdocs \
-      @babel/eslint-parser \
-      @babel/core \
-      @lwc/eslint-plugin-lwc
-      
+  @salesforce/sfdx-lwc-jest \
+  @cparra/apexdocs \
+  @babel/eslint-parser \
+  @babel/core \
+  @lwc/eslint-plugin-lwc
+
 RUN sfdx plugins:install @salesforce/sfdx-scanner
 
 COPY ./ ./
