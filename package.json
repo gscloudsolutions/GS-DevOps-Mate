@@ -9,7 +9,7 @@
     "homepage": "https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/README.md",
     "scripts": {
         "lint": "eslint ./src/**",
-        "lint:fix": "eslint --fix ./src/**",
+        "format": "prettier --write ./src/**",
         "postinstall": "husky install && which code > /dev/null 2>&1 && yarn dlx @yarnpkg/sdks vscode",
         "prepack": "pinst --disable",
         "postpack": "pinst --enable"
@@ -66,6 +66,8 @@
     },
     "devDependencies": {
         "eslint": "^8.38.0",
+        "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-prettier": "^4.2.1",
         "husky": "^8.0.0",
         "pinst": "^3.0.0",
         "prettier": "^2.8.7"
