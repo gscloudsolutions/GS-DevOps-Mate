@@ -9,6 +9,7 @@
     "homepage": "https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/README.md",
     "scripts": {
         "lint": "eslint ./src/**",
+        "lint:fix": "eslint --fix ./src/**",
         "postinstall": "husky install && which code > /dev/null 2>&1 && yarn dlx @yarnpkg/sdks vscode",
         "prepack": "pinst --disable",
         "postpack": "pinst --enable"
