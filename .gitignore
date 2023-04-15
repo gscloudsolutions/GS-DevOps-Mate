@@ -1,5 +1,7 @@
 # Dependencies
-.yarn/
+!.yarn/
+.yarn/*
+!.yarn/releases
 node_modules/
 
 # IDE
