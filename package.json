@@ -1,9 +1,14 @@
 {
   "name": "gs-devops-mate",
-  "version": "0.2",
+  "version": "7.186.7",
   "description": "CI/CD Services Agnostic tool to make conventional CI/CD for Salesforce super easy!",
   "main": "./src/main.js",
+  "author": "leo@gscloudsolutions.com",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "homepage": "https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/README.md",
   "scripts": {
+    "lint": "eslint ./src/**",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,9 +26,6 @@
     "NodeJS",
     "GS DevOps Mate"
   ],
-  "author": "leo@gscloudsolutions.com",
-  "license": "BSD3",
-  "homepage": "https://github.com/gscloudsolutions/GS-DevOps-Mate/blob/main/README.md",
   "dependencies": {
     "@salesforce/core": "^2.37.1",
     "axios": "^0.27.2",
@@ -60,6 +62,7 @@
     "sfCompare": "src/services/sfDiffService.js"
   },
   "devDependencies": {
-    "eslint-config-airbnb": "^17.1.0"
-  }
+    "eslint": "^8.38.0",
+  },
+  "packageManager": "yarn@3.5.0"
 }
