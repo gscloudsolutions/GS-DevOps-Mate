@@ -1,4 +1,5 @@
 root: true
+parser: "@typescript-eslint/parser"
 
 env:
     node: true
@@ -6,10 +7,12 @@ env:
 
 plugins:
     - prettier
+    - "@typescript-eslint"
 
 extends:
     - eslint:recommended
     - prettier
+    - plugin:@typescript-eslint/recommended
 
 parserOptions:
     ecmaVersion: 2022

@@ -1,0 +1,9 @@
+{
+    "include": ["src/**/*", "tests/**/*"],
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "outDir": "dist"
+    }
+}
