@@ -19,26 +19,6 @@ const authenticate = require("../services/authenticationService.js");
 const logger = require("../utils/logger");
 const manifestUtil = require("../utils/manifestUtil");
 
-const ignoreMetadataListFileName = process.env.MDT_IGNORE_FILE || "ignoreMetadataList.json";
-
-// const retrieveLayout = () => { // Code to retrieve list of components of a particular type
-//   sfcore.AuthInfo.create({ username: config.orgusername })
-//     .then(authInfo => sfcore.Connection.create({ authInfo }))
-//     .then((conn) => {
-//       const types = [{ type: 'Layout' }];
-//       conn.metadata.list(types, '45.0', (err, metadata) => {
-//         if (err) {
-//           console.error('err', err);
-//         }
-//         logger.debug(metadata);
-//       });
-//     })
-//     .catch((error) => {
-//       console.error(error);
-//     });
-// };
-
-retrieveLayout();
 program
     .command("fetch")
     .description("Fetches metadataMappings from the target Org.")

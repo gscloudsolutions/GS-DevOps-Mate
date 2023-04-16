@@ -1,8 +1,6 @@
-const colors = require("colors");
 const type = require("type-detect");
 
 const castArray = require("../utils/utils").castArray;
-const logger = require("../utils/logger");
 
 function transformAndBeautifyFailureResults(outputJSON) {
     if (!outputJSON || outputJSON?.result?.success) {

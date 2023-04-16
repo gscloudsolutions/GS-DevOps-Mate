@@ -1,5 +1,4 @@
 const axios = require("axios");
-const type = require("type-detect");
 
 const logger = require("./logger");
 const castArray = require("./utils").castArray;
@@ -337,7 +336,7 @@ const generateFailureNotificationForSlack = async (
         .then((buildInfo) =>
             createFailureNotificationForSlack(
                 stdout,
-                (minCodeCoveragePerCmp = 75),
+                minCodeCoveragePerCmp,
                 codeCoverageResult,
                 isValidation,
                 buildInfo,
@@ -401,7 +400,6 @@ const createSuccessNotificationForSlack = (codeCoverageResult, isValidation, bui
     };
 };
 
-// eslint-disable-next-line max-len
 const generateSuccessNotificationForSlack = async (codeCoverageResult, isValidation, notificationTitle) =>
     ciCDProviderMessaging[ciCDProvider]
         .getBuildInfo()

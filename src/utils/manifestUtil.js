@@ -337,50 +337,56 @@ const listAllMetadata = async (conn, backupDirPath) => {
 };
 
 const createTypesFromOrgCmps = (conn, backupDirPath) =>
-    new Promise(async (resolve, reject) => {
+    // TODO: Replace chain of promises by async await!
+    new Promise((resolve, reject) => {
         try {
             const types = [];
             const typesSet = new Set();
-            const fileNamesToIgnore = await getMetadataFilesToIgnore(backupDirPath);
-            listAllMetadata(conn, backupDirPath)
-                .then((componentsList) => {
-                    let cmps;
-                    logger.info("Total Number of Components/Metadata: ", componentsList.length);
-                    componentsList.forEach((component) => {
-                        if (component) {
-                            let cmpType = component.type;
-                            logger.debug("component.type: ", component.type);
-                            // typeof component.type === 'string' to avoid types like:
-                            // { '$': [Object]}
-                            if (
-                                component.type &&
-                                typeof component.type === "string" &&
-                                component.type.includes("Folder")
-                            ) {
-                                cmpType = component.type.replace("Folder", "");
-                            }
-                            if (component.type === "EmailFolder") {
-                                cmpType = "EmailTemplate";
-                            }
-                            if (!typesSet.has(cmpType) && typeof component.type === "string") {
-                                typesSet.add(cmpType);
-                                cmps = [];
-                                types.push({ name: cmpType, members: cmps });
-                                if (!fileNamesToIgnore.includes(component.fullName)) {
-                                    cmps.push({ "#text": component.fullName });
+            const fileNamesToIgnore = getMetadataFilesToIgnore(backupDirPath)
+                .then(() => {
+                    listAllMetadata(conn, backupDirPath)
+                        .then((componentsList) => {
+                            let cmps;
+                            logger.info("Total Number of Components/Metadata: ", componentsList.length);
+                            componentsList.forEach((component) => {
+                                if (component) {
+                                    let cmpType = component.type;
+                                    logger.debug("component.type: ", component.type);
+                                    // typeof component.type === 'string' to avoid types like:
+                                    // { '$': [Object]}
+                                    if (
+                                        component.type &&
+                                        typeof component.type === "string" &&
+                                        component.type.includes("Folder")
+                                    ) {
+                                        cmpType = component.type.replace("Folder", "");
+                                    }
+                                    if (component.type === "EmailFolder") {
+                                        cmpType = "EmailTemplate";
+                                    }
+                                    if (!typesSet.has(cmpType) && typeof component.type === "string") {
+                                        typesSet.add(cmpType);
+                                        cmps = [];
+                                        types.push({ name: cmpType, members: cmps });
+                                        if (!fileNamesToIgnore.includes(component.fullName)) {
+                                            cmps.push({ "#text": component.fullName });
+                                        }
+                                    } else if (
+                                        !fileNamesToIgnore.includes(component.fullName) &&
+                                        typeof component.type === "string"
+                                    ) {
+                                        types
+                                            .find((element) => element.name === cmpType)
+                                            .members.push({ "#text": component.fullName });
+                                    }
                                 }
-                            } else if (
-                                !fileNamesToIgnore.includes(component.fullName) &&
-                                typeof component.type === "string"
-                            ) {
-                                types
-                                    .find((element) => element.name === cmpType)
-                                    .members.push({ "#text": component.fullName });
-                            }
-                        }
-                    });
-                    logger.debug("Types: ", util.inspect(types, { maxArrayLength: null }));
-                    resolve(types);
+                            });
+                            logger.debug("Types: ", util.inspect(types, { maxArrayLength: null }));
+                            resolve(types);
+                        })
+                        .catch((error) => {
+                            reject(error);
+                        });
                 })
                 .catch((error) => {
                     reject(error);

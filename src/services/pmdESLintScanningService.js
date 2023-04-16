@@ -10,16 +10,10 @@
  */
 
 const shellJS = require("shelljs");
-const fs = require("fs-extra");
-const path = require("path");
-const tableify = require("tableify");
-const colors = require("colors");
 const type = require("type-detect");
 
 const logger = require("../utils/logger");
 const notificationService = require("./scaSlackNotifService");
-
-const SEVERITY_VALUE_FOR_FAILURE = process.env.SEVERITY_VALUE_FOR_FAILURE || 1;
 
 const severitySummary = {};
 

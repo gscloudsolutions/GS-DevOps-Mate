@@ -11,15 +11,10 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 const shellJS = require("shelljs");
-const fs = require("fs-extra");
 const program = require("commander");
-const path = require("path");
 
 const authenticate = require("../services/authenticationService");
 const deploymentService = require("../services/deploymentService");
-const deploymentInfoService = require("../services/deploymentInfoService");
-const gitUtils = require("../utils/gitUtils");
-const notify = require("../utils/notificationsUtil");
 const logger = require("../utils/logger");
 
 const projectPath = process.env.PROJECT_PATH || ".";

@@ -32,7 +32,7 @@ const testLevel = {
  * @return Promise<JSON> - Returns a JSON of test run results, containing a status code and test results with coverage
  */
 const getTestSubmission = (testType, alias, filePath, testClasses = null, wait) =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
         logger.debug("runApexTests.js :: submitting test");
         // we are not calling force:apex:test:report anymore because the flag -r json returns back with the full test result.
         // this is undocumented in the sfdx CLI, but since it works, we are making the assumption this is working by design.

@@ -4,7 +4,6 @@ const emoji = require("node-emoji");
 const extract = require("extract-zip");
 const path = require("path");
 const { readdir } = require("fs").promises;
-const util = require("util");
 const parseString = require("xml2js").parseString;
 const parseStringPromise = require("xml2js").parseStringPromise;
 const xml2js = require("xml2js");
@@ -13,7 +12,6 @@ const builder = new xml2js.Builder();
 
 const manifestUtil = require("../utils/manifestUtil");
 const logger = require("../utils/logger");
-const { fs } = require("@salesforce/core");
 
 const workingDirectory = process.env.PROJECT_PATH || ".";
 const fileExtensions = ["workflows", "labels"];
@@ -29,7 +27,7 @@ const specialMetadataMap = {
 };
 
 const refreshBranchFromOrg = (accessSecret, srcDir) =>
-    new Promise((resolve, reject) => {
+    new Promise((_, reject) => {
         try {
             shellJS.exec("pwd");
             if (srcDir[srcDir.length - 1] === "/") {
@@ -241,23 +239,23 @@ const convertToSource = async (source, destination) => {
     return `${workingDirectory}/${destination}`;
 };
 
-// TODO
-const mergeXMLs = async (sourceFile, destinationFile, childrenToResolve) => {
-    // TODO: Exception Handling
-    const sourceFileData = fsExtra.readFile(sourceFile, "utf-8");
-    logger.info("sourceFileData:");
-    logger.dir(sourceFileData);
+// TODO: Code not used!
+// const mergeXMLs = async (sourceFile, destinationFile) => {
+//     // TODO: Exception Handling
+//     const sourceFileData = fsExtra.readFile(sourceFile, "utf-8");
+//     logger.info("sourceFileData:");
+//     logger.dir(sourceFileData);
 
-    const destFileData = fsExtra.readFile(destinationFile, "utf-8");
-    logger.info("destFileData");
-    logger.dir(destFileData);
+//     const destFileData = fsExtra.readFile(destinationFile, "utf-8");
+//     logger.info("destFileData");
+//     logger.dir(destFileData);
 
-    // Logic to merge the JSON data
+//     // Logic to merge the JSON data
 
-    // Logic to convert the newly created merged JSON data back to XML file
+//     // Logic to convert the newly created merged JSON data back to XML file
 
-    return "Merge Successful";
-};
+//     return "Merge Successful";
+// };
 
 const mergeToSource = async (convertedSrcPath, moduleName, filesToIgnore) =>
     new Promise((resolve, reject) => {
@@ -423,7 +421,7 @@ const promisifiedParseString = (data) => {
 
 const convertToRealSFDXFormat = async (files, destination) => {
     let topLevelName = "";
-    for (index = 0; index < files.length; index++) {
+    for (let index = 0; index < files.length; index++) {
         try {
             topLevelName = path.basename(
                 path.basename(files[index], ".xml"),
@@ -434,9 +432,9 @@ const convertToRealSFDXFormat = async (files, destination) => {
             if (topLevelName === "CustomLabels") {
                 topLevelName = "";
             }
-            data = await fsExtra.readFile(files[index], "utf-8");
+            const data = await fsExtra.readFile(files[index], "utf-8");
             logger.debug("data: ", data);
-            result = await promisifiedParseString(data);
+            const result = await promisifiedParseString(data);
             logger.debug("result: ", result);
             for (const rootElement in result) {
                 logger.debug("rootElement: ", rootElement);
@@ -445,7 +443,7 @@ const convertToRealSFDXFormat = async (files, destination) => {
                     logger.debug("type of firstLevelElmnt value is: ", type(result[rootElement][firstLevelElmnt]));
                     if (type(result[rootElement][firstLevelElmnt]) === "Array") {
                         logger.debug("firstLevelElmnt Array length: ", result[rootElement][firstLevelElmnt].length);
-                        for (element in result[rootElement][firstLevelElmnt]) {
+                        for (let element in result[rootElement][firstLevelElmnt]) {
                             const elementName = result[rootElement][firstLevelElmnt][element].fullName[0];
                             logger.debug("element name: ", elementName);
 

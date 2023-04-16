@@ -114,7 +114,7 @@ const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias, dep
                 logger.debug("recordDetails: ", recordDetails);
                 shellJS.exec(
                     `SFDX_JSON_TO_STDOUT=true sfdx force:data:record:update -s Deployment_Info__c -i ${response.records[0].Id} -v "${recordDetails}" -u ${targetUserName} --json`,
-                    (code, stdout, stderr) => {
+                    (code, stdout) => {
                         logger.debug("Status Code: ", code);
                         if (code !== 0) {
                             logger.error(stdout);
@@ -140,7 +140,7 @@ const updateDeploymentInfo = (moduleName, commitSHA, tag, connection, alias, dep
                 const recordDetails = `Name=${moduleName} Git_Tag__c=${tag} Commit_SHA__c=${commitSHA} Module_Name__c=${moduleName}`;
                 shellJS.exec(
                     `SFDX_JSON_TO_STDOUT=true sfdx force:data:record:create -s Deployment_Info__c -v "${recordDetails}" -u ${targetUserName} --json`,
-                    (code, stdout, stderr) => {
+                    (code, stdout) => {
                         logger.debug("Status Code: ", code);
                         logger.debug(stdout);
                         /* if (stderr) {
@@ -176,23 +176,24 @@ const updateDeploymentInfoByName = (moduleName, commitSHA, targetUserName) =>
         );
     });
 
-const updateDeploymentId = (moduleName, commitSHA, targetUserName) =>
-    new Promise((resolve, reject) => {
-        shellJS.exec(
-            `sfdx force:data:record:update -s Deployment_Info__c -w "Module_Name__c='${moduleName}'" -v "Commit_SHA__c='${commitSHA}'" -u ${targetUserName} --json`,
-            (code, stdout, stderr) => {
-                logger.debug("Status Code: ", code);
-                if (code !== 0) {
-                    logger.error(stderr);
-                    reject(stderr);
-                }
-                // const resultJSON = JSON.parse(stdout, true);
-                // logger.debug('deploymentInfoService.js: updateDeploymentInfoByName: resultJSON: ', resultJSON);
-                // resolve(resultJSON.result);
-                resolve("Existing Deployment_Info__c record got updated");
-            }
-        );
-    });
+// TODO: Verify if this code is necessary
+// const updateDeploymentId = (moduleName, commitSHA, targetUserName) =>
+//     new Promise((resolve, reject) => {
+//         shellJS.exec(
+//             `sfdx force:data:record:update -s Deployment_Info__c -w "Module_Name__c='${moduleName}'" -v "Commit_SHA__c='${commitSHA}'" -u ${targetUserName} --json`,
+//             (code, stdout, stderr) => {
+//                 logger.debug("Status Code: ", code);
+//                 if (code !== 0) {
+//                     logger.error(stderr);
+//                     reject(stderr);
+//                 }
+//                 // const resultJSON = JSON.parse(stdout, true);
+//                 // logger.debug('deploymentInfoService.js: updateDeploymentInfoByName: resultJSON: ', resultJSON);
+//                 // resolve(resultJSON.result);
+//                 resolve("Existing Deployment_Info__c record got updated");
+//             }
+//         );
+//     });
 
 // Export methods
 module.exports = {

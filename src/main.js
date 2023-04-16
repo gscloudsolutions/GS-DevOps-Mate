@@ -3,4 +3,4 @@ const fetchRootPath = () => {
     return __dirname;
 };
 
-export { fetchRootPath };
+export default { fetchRootPath };

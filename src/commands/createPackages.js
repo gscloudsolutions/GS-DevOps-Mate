@@ -19,6 +19,8 @@ const secondGenPackaging = require("../services/secondGenPackagingService");
 const logger = require("../utils/logger");
 const notify = require("../utils/notificationsUtil");
 
+const SLACK_WEBHOOK_URL = process.env.SLACK_NOTIFICATION_URI ? process.env.SLACK_NOTIFICATION_URI : null;
+
 // Various Command Definitions and Actions for Artifacts/Packages creation
 program.description("Set of commands to create different type of artifacts/packages");
 

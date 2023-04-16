@@ -112,7 +112,7 @@ const loginWithJWT = (clientId, severyKeyPath, sfUsername, orgAlias, envType, de
  * @author           : Groundswell Cloud Solutions
  */
 const authenticateUser = function (command, constants) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         /* Run deployment using Alias  */
         if (constants.alias) {
             resolve({ token: constants.alias, type: "alias" });

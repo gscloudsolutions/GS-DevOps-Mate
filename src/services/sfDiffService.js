@@ -30,34 +30,36 @@ const dehydrate = (element, name, path) => ({
     fullPath: `${element[path]}/${element[name]}`,
 });
 
-const createTypeToNamesMap = (elements) => {
-    let names;
-    const typeSet = new Set();
-    const typesToNameObj = {};
-    elements.forEach((element) => {
-        console.log(element);
-        if (!typeSet.has(element.type)) {
-            typeSet.add(element.type);
-            names = [];
-            names.push(element.name);
-            typesToNameObj[element.type] = names;
-        } else {
-            typesToNameObj[element.type].push(element.name);
-        }
-    });
-    return typesToNameObj;
-};
+// TODO: Verify if this code is necessary
+// const createTypeToNamesMap = (elements) => {
+//     let names;
+//     const typeSet = new Set();
+//     const typesToNameObj = {};
+//     elements.forEach((element) => {
+//         console.log(element);
+//         if (!typeSet.has(element.type)) {
+//             typeSet.add(element.type);
+//             names = [];
+//             names.push(element.name);
+//             typesToNameObj[element.type] = names;
+//         } else {
+//             typesToNameObj[element.type].push(element.name);
+//         }
+//     });
+//     return typesToNameObj;
+// };
 
 dirCompare.compare(config.projectpath, config.diffProjectPath);
 
-// TODO: Implenent the org comparison feature
-const compareTwoOrgs = (orgOne, orgTwo) => new Promise((resolve, reject) => {});
+// TODO: Implement the org comparison feature
+//const compareTwoOrgs = (orgOne, orgTwo) => new Promise((resolve, reject) => {});
 
-// TODO: Implenent the org to repo comparison feature
-const compareOrgWithRepo = (orgToCompare, folderLocationToCompare) => new Promise((resolve, reject) => {});
+// TODO: Implement the org to repo comparison feature
+//const compareOrgWithRepo = (orgToCompare, folderLocationToCompare) => new Promise((resolve, reject) => {});
 
+// TODO: Implement the org to repo comparison feature
 const compareTwoRepos = (folderLocationOne, folderLocationTwo) =>
-    new Promise((resolve, reject) => {
+    new Promise(() => {
         const options = {
             compareContent: true,
             ignoreLineEnding: true,
@@ -118,14 +120,14 @@ const compareTwoRepos = (folderLocationOne, folderLocationTwo) =>
     });
 
 if (argv.compareOrgs === "true") {
-    compareTwoOrgs();
+    //compareTwoOrgs();
 }
 if (argv.compareOrgWithRepo === "true") {
-    compareOrgWithRepo();
+    //compareOrgWithRepo();
 }
 if (argv.compareRepos === "true") {
     compareTwoRepos(config.pathOneToCompare, config.pathTwoToCompare);
 }
 
 // Export all methods
-module.exports = { compareTwoOrgs, compareOrgWithRepo, compareTwoRepos };
+module.exports = { compareTwoRepos };

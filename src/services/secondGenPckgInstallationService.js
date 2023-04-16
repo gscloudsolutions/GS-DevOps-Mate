@@ -42,7 +42,7 @@ const handlePackageUninstallation = (result, command, resolve, reject) => {
         resolve("No installed package found, nothing needs to be uninstalled");
     } else {
         const packageIdentifier = command.package || result.SubscriberPackageVersionId;
-        commandOutput = shellJS.exec(
+        const commandOutput = shellJS.exec(
             `SFDX_JSON_TO_STDOUT=true sfdx force:package:uninstall --package ${packageIdentifier} -u ${command.orgKey}  --json -w 21`
         ).stdout;
         const parsedOutput = JSON.parse(commandOutput);
@@ -70,7 +70,7 @@ const handlePackageInstallation = (result, command, resolve, reject) => {
         );
     } else {
         const packageIdentifier = command.package.toUpperCase() !== LATEST ? command.package : result.packageId;
-        commandOutput = shellJS.exec(
+        const commandOutput = shellJS.exec(
             `SFDX_JSON_TO_STDOUT=true sfdx force:package:install --package ${packageIdentifier} -u ${command.orgKey}  --json --noprompt -w 21`
         ).stdout;
         const parsedOutput = JSON.parse(commandOutput);

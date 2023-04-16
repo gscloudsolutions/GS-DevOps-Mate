@@ -101,49 +101,50 @@ function getTestsClasses(artifactPath) {
     });
 }
 
+// TODO: Code not used, verify why!
 /**
  * @return {*}
  * @param {*} srcProjectPath
  * @param {*} targetUserName
  * @param {*} dependenciesFilePath
  */
-function srcArtifactDeployOneByOne(srcProjectPath, targetUserName, dependenciesFilePath) {
-    // Will run if undefined i.e third argument is not passed
-    return new Promise((resolve, reject) => {
-        try {
-            logger.debug(srcProjectPath, targetUserName, dependenciesFilePath);
-            let packageObj;
-            /* Reading the dependencies file based on the location provided as param,
-      If not provided, it will consider sfdx-project.json as the dependencies
-      file */
-            if (dependenciesFilePath) {
-                packageObj = fs.readJSONSync(`${dependenciesFilePath}`);
-            } else {
-                packageObj = fs.readJSONSync(`${srcProjectPath}/sfdx-project.json`);
-            }
+// function srcArtifactDeployOneByOne(srcProjectPath, targetUserName, dependenciesFilePath) {
+//     // Will run if undefined i.e third argument is not passed
+//     return new Promise((resolve, reject) => {
+//         try {
+//             logger.debug(srcProjectPath, targetUserName, dependenciesFilePath);
+//             let packageObj;
+//             /* Reading the dependencies file based on the location provided as param,
+//       If not provided, it will consider sfdx-project.json as the dependencies
+//       file */
+//             if (dependenciesFilePath) {
+//                 packageObj = fs.readJSONSync(`${dependenciesFilePath}`);
+//             } else {
+//                 packageObj = fs.readJSONSync(`${srcProjectPath}/sfdx-project.json`);
+//             }
 
-            // Change the working directory to the project path provided as param
-            shellJS.cd(`${srcProjectPath}`);
+//             // Change the working directory to the project path provided as param
+//             shellJS.cd(`${srcProjectPath}`);
 
-            /* Looping through based on dependencies and deploying each modules
-      one by one to the target org */
-            packageObj.packageDirectories.forEach((element) => {
-                // logger.debug(emoji.emojify(`:rocket:  Deploying ${element.path}................................... :rocket:`));
-                logger.debug(`Deploying ${element.path}...................................`);
-                logger.debug(
-                    `sfdx force:source:deploy -p ./${element.path}  --json --wait 20 --targetusername ${targetUserName}`
-                );
-                // shellJS commands works synchronously by default
-                shellJS.exec(
-                    `sfdx force:source:deploy -p ./${element.path}  --json --wait 20 --targetusername ${targetUserName}`
-                );
-            });
-            resolve("Successful.....");
-        } catch (exception) {
-            reject(exception);
-        }
-    });
-}
+//             /* Looping through based on dependencies and deploying each modules
+//       one by one to the target org */
+//             packageObj.packageDirectories.forEach((element) => {
+//                 // logger.debug(emoji.emojify(`:rocket:  Deploying ${element.path}................................... :rocket:`));
+//                 logger.debug(`Deploying ${element.path}...................................`);
+//                 logger.debug(
+//                     `sfdx force:source:deploy -p ./${element.path}  --json --wait 20 --targetusername ${targetUserName}`
+//                 );
+//                 // shellJS commands works synchronously by default
+//                 shellJS.exec(
+//                     `sfdx force:source:deploy -p ./${element.path}  --json --wait 20 --targetusername ${targetUserName}`
+//                 );
+//             });
+//             resolve("Successful.....");
+//         } catch (exception) {
+//             reject(exception);
+//         }
+//     });
+// }
 
 /**
  *
@@ -166,10 +167,7 @@ function prepareAndCallMDDeployCommand(
     testLevel,
     testsToRun,
     runSpecifiedTests,
-    uri,
-    minBuildCoverage = 75,
-    minCodeCoveragePerCmp = 75,
-    notificationTitle
+    uri
 ) {
     // Will run if undefined i.e third argument is not passed
     return new Promise((resolve, reject) => {
@@ -196,10 +194,10 @@ function prepareAndCallMDDeployCommand(
             }
             logger.debug("command: ", command);
 
-            shellJS.exec(command, { silent: true }, (status, stdout, stderr) => {
+            shellJS.exec(command, { silent: true }, (status, stdout) => {
                 logger.debug("status: ", status);
                 logger.debug("stdout: ", stdout);
-                resultsJSObject = JSON.parse(stdout);
+                const resultsJSObject = JSON.parse(stdout);
                 if (status !== 0) {
                     logger.debug(
                         "deploy.js: prepareAndCallMDDeployCommand: Deployment/Validation failed: error: ",
@@ -258,7 +256,7 @@ const mdapiArtifactDeploy = (
                 logger.debug("Zipped artifact is required: ", ZIPPED_ARTIFACT);
                 logger.debug("artifactPath", artifactPath);
                 promisfiedExtract(`${artifactPath}.zip`, { dir: `${artifactPath}` })
-                    .then((result) => {
+                    .then(() => {
                         logger.debug("list everything in the artifact created");
                         shellJS.exec(`ls -a ${artifactPath}`);
                         return deploy.setTestsAndDeploy(
@@ -403,7 +401,7 @@ const deploy = {
         // If URI not defined, return the sucessful deployment message so that
         // the calling code can exit
         if (!uri) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 resolve("Deployment Successful");
             });
         } else {
@@ -488,7 +486,7 @@ const notification = {
     Description : Successful Deployment Notification
     ==========================================================*/
     success: function (uri, codeCoverageResults, validate, notificationTitle) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             notify
                 .generateSuccessNotificationForSlack(codeCoverageResults, validate, notificationTitle)
                 .then((message) => notify.sendNotificationToSlack(uri, message))
@@ -527,13 +525,13 @@ const notification = {
     },
 };
 
-const quickDeployUsingId = function (deploymentId, uri, targetUserName, notificationTitle) {
+const quickDeployUsingId = function (deploymentId, uri, targetUserName) {
     let res = null;
-    return new Promise((resolve, reject) => {
-        new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+        new Promise((resolve) => {
             const command = `SFDX_JSON_TO_STDOUT=true sfdx force:mdapi:deploy --validateddeployrequestid ${deploymentId} --json --wait ${WAIT_TIME} --verbose --targetusername ${targetUserName}`;
             logger.debug("command: ", command);
-            shellJS.exec(command, (status, stdout, stderr) => {
+            shellJS.exec(command, (status, stdout) => {
                 logger.debug("status: ", status);
                 resolve(stdout);
             });
@@ -712,7 +710,7 @@ const deploymentProcessor = {
         let shortSHA;
         if (deploymentRes === DEPLOYMENT_RESPONSE_NO_ARTIFACT) {
             logger.info("Not Updating the deployment Info in the target org, as there is nothing deployed");
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 resolve(deploymentRes);
             });
         }
@@ -762,7 +760,7 @@ const deploymentProcessor = {
                   );
         } else {
             logger.info("Not Updating the deployment Info in the target org, as it is a bypass");
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 resolve(deploymentRes);
             });
         }
@@ -812,7 +810,12 @@ const deploymentProcessor = {
                     type == "alias"
                         ? await this.updateDeployInfo(command, response, aliasOrConnection, null, projectPath)
                         : await this.updateDeployInfo(command, response, null, aliasOrConnection, projectPath);
-                    return notification.success(uri, `${NO_CODE_COVERAGE_INFO}`, false, notificationTitle);
+                    return notification.success(
+                        constants.uri,
+                        `${NO_CODE_COVERAGE_INFO}`,
+                        false,
+                        command.notificationTitle
+                    );
                 } else {
                     // Fallback to standard(non-quick) deployment
                     //return this.mdapiDeploy(command, constants, artifact, aliasOrConnection, type, DIRECTORY, projectPath);

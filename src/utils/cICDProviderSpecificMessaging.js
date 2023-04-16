@@ -27,7 +27,7 @@ const ciCDSpecificMessaging = {
             const stepId = steps.join("-");
             logger.debug("stepId: ", stepId);
 
-            buildInfo = {
+            const buildInfo = {
                 BuildName: process.env.BITBUCKET_BUILD_NUMBER,
                 BuildResultsURL: `${process.env.BITBUCKET_GIT_HTTP_ORIGIN}/addon/pipelines/home#!/results/${process.env.BITBUCKET_BUILD_NUMBER}`,
                 BuildAuthorName: DISPLAY_NAME,
