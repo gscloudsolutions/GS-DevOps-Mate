@@ -11,5 +11,9 @@ node_modules/
 # Errors
 hs_err*
 
+# Generated files
+dist/
+.temp/
+
 # Other ignored files
 .DS_Store

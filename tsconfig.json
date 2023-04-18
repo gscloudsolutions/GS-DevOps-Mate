@@ -1,9 +1,27 @@
 {
-    "include": ["src/**/*", "tests/**/*"],
+    "include": ["src/**/*"],
+    "exclude": ["node_modules/**/*", ".yarn/**/*"],
     "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "dist",
+        "rootDir": "src/",
+        "module": "es2022",
+        "moduleResolution": "node",
+        "target": "es2022",
+
         "alwaysStrict": true,
         "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
         "resolveJsonModule": true,
-        "outDir": "dist"
+        "strict": true,
+
+        "paths": {
+            "@mate/ci-cd": ["src/ci-cd/index.ts"],
+            "@mate/system/logger": ["src/system/logger.ts"]
+        }
     }
 }
