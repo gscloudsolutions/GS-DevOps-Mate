@@ -20,7 +20,7 @@
         "strict": true,
 
         "paths": {
-            "@mate/ci-cd": ["src/ci-cd/index.ts"],
+            "@mate/ci-cd": ["src/ci-cd/ci-cd.ts"],
             "@mate/system/logger": ["src/system/logger.ts"]
         }
     }
