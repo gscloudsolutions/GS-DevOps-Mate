@@ -1,5 +1,5 @@
 import logger from "@mate/system/logger";
-import { BuildInfo } from "./types";
+import type { BuildInfo } from "@mate/system/types";
 
 export async function getBuildInfo(): Promise<BuildInfo> {
     logConfiguration();

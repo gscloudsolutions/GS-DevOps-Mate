@@ -1,4 +1,4 @@
-import { BuildInfo } from "../../types";
+import { BuildInfo } from "@mate/system/types";
 
 export const defaultBuildInfo: BuildInfo = Object.freeze({
     buildName: "",

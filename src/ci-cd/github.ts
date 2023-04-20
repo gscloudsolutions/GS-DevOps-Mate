@@ -1,5 +1,5 @@
 import logger from "@mate/system/logger";
-import { BuildInfo } from "./types";
+import type { BuildInfo } from "@mate/system/types";
 
 export async function getBuildInfo(): Promise<BuildInfo> {
     const baseUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`;

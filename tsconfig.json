@@ -21,7 +21,8 @@
 
         "paths": {
             "@mate/ci-cd": ["src/ci-cd/ci-cd.ts"],
-            "@mate/system/logger": ["src/system/logger.ts"]
+            "@mate/system/logger": ["src/system/logger.ts"],
+            "@mate/system/types": ["src/system/types.d.ts"]
         }
     }
 }
